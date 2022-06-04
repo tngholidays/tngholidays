@@ -37,7 +37,8 @@ class WhatsAppDriver extends Driver
         
 	    $curl = $this->WhatsAppCurl($data);
 	    $result = json_decode($curl,true);
-	    if($result['status']=='Error'){
+	    
+	    if(isset($result['status']) && $result['status']=='Error'){
 	    	throw  new SmsException($result['msg']);
 	    }
 	    return $result;

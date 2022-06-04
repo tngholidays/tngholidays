@@ -23,6 +23,7 @@ use Modules\Core\Models\Terms;
     
     use Modules\Forex\Models\ForexCountry;
       use Propaganistas\LaravelPhone\PhoneNumber;
+      use Illuminate\Support\Facades\Config;
 
 //include '../../custom/Helpers/CustomHelper.php';
 
@@ -1281,7 +1282,9 @@ function margeCustomTour($tour_id, $customTour){
         }
       }
     }
-    
+    foreach ($customTour['terms'] as $key3 => $keyName3) {
+            $tour->tour_term[$key3] = getTermById($keyName3);
+    }
     return @$tour;
 }
 function time_elapsed_string($datetime, $full = false){
@@ -1592,4 +1595,35 @@ function getExtraContentTypes($type=null) {
         $data = $data[$type];
     }
     return $data;
+}
+function sendWhatsappBulkMsg($post)
+{
+    
+    $SMS_TOKEN_KEY = setting_item('sms_whatsapp_token');
+    $data = [
+           'key' => $SMS_TOKEN_KEY,
+           'mobileno' => $post['mobileno'], //comma separeted multiple mobile numbers
+           'msg'   => $post['message'],
+           'messageType'=>'regular',
+           'type'=>"Text",
+    ];
+    if(!empty($post['file'])){
+        $data['File'] = $post['file'];
+        $data['type'] = 'Image';
+    }
+    $curl = WhatsAppCurl($data);
+    $result = json_decode($curl,true);
+    if(isset($result['status']) && $result['status']=='Error'){
+        throw  new SmsException($result['msg']);
+    }
+    return $result;
+}
+function WhatsAppCurl($data){
+    
+    $ch = curl_init('https://www.cp.bigtos.com/api/v1/send-bulk-messages');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    return $response;
 }

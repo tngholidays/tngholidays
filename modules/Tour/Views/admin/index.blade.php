@@ -64,7 +64,7 @@
                         ?>
                     </select>
                     */ ?>
-                            <select class="form-control" name="location_id">
+                    <select class="form-control" name="location_id">
                                 <option value="">Select Location</option>
                                 @if(count($locations) > 0)
                                     @foreach($locations as $location )

@@ -124,7 +124,6 @@ footer {
                         <th colspan="2" style="text-align: left; padding: 0px 0px 10px;">INCLUSION</th>
                     </tr>
                     @php
-                        $attributes = \Modules\Core\Models\Terms::getTermsById($tour->tour_term->pluck('term_id'));
                           $ii = 0;
                     @endphp
                     @if(!empty($attributes) and count($attributes[2]) > 0)

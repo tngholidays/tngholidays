@@ -246,33 +246,36 @@ return [
     ],
 
     'debug_blacklist' => [
-        '_ENV' => [
-            'APP_KEY',
-            'DB_PASSWORD',
-            'REDIS_PASSWORD',
-            'MAIL_PASSWORD',
-            'PUSHER_APP_KEY',
-            'PUSHER_APP_SECRET',
-            "REDIS_HOST",
-            "SCRIPT_FILENAME",
-            "DOCUMENT_ROOT"
-        ],
-        '_SERVER' => [
-            'APP_KEY',
-            'DB_PASSWORD',
-            'REDIS_PASSWORD',
-            'MAIL_PASSWORD',
-            'PUSHER_APP_KEY',
-            'PUSHER_APP_SECRET',
-            "MAILGUN_SECRET",
-            "MAIL_USERNAME"
-        ],
-        '_POST' => [
-            'password',
-        ],
+        // '_ENV' => [
+        //     'APP_KEY',
+        //     'DB_PASSWORD',
+        //     'REDIS_PASSWORD',
+        //     'MAIL_PASSWORD',
+        //     'PUSHER_APP_KEY',
+        //     'PUSHER_APP_SECRET',
+        //     "REDIS_HOST",
+        //     "SCRIPT_FILENAME",
+        //     "DOCUMENT_ROOT"
+        // ],
+        // '_SERVER' => [
+        //     'APP_KEY',
+        //     'DB_PASSWORD',
+        //     'REDIS_PASSWORD',
+        //     'MAIL_PASSWORD',
+        //     'PUSHER_APP_KEY',
+        //     'PUSHER_APP_SECRET',
+        //     "MAILGUN_SECRET",
+        //     "MAIL_USERNAME"
+        // ],
+        // '_POST' => [
+        //     'password',
+        // ],
+        '_COOKIE' => array_keys($_COOKIE),
+        '_SERVER' => array_keys($_SERVER),
+        '_ENV' => array_keys($_ENV),  
     ],
 
-    'version'=>"1.2.4",
+    'version'=>"1.3.6",
 
     'updater_url'=>"http://check.bookingcore.org/updater.php"
 

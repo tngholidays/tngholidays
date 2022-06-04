@@ -1928,7 +1928,7 @@ __webpack_require__.r(__webpack_exports__);
         $(this).select2(configs);
       });
     }
-    var formgroupitem = $(this).closest(".form-group-item");
+     var formgroupitem = $(this).closest(".form-group-item");
     ItineraryDaysCount(formgroupitem);
     var multiselectDrop2 = $(this).closest(".form-group-item").find(".g-items .item:last-child").find('.ismultiple .multiselectDrop2');
     itinerarySightseenManage();
@@ -2591,15 +2591,14 @@ jQuery(document).on("change", ".tourAttributes", function (e, params) {
             });
             }
         });
-
+        
         jQuery('.g-items .item .multiselectDrop2').each(function (i, obj) {
            var configs = $(obj).data('options');
            console.log(configs);
             $(obj).select2(configs);
         });
         jQuery('.g-items .item .multiselectDrop').each(function (i, obj) {
-           var configs = $(obj).data('options');
-            $(obj).select2(configs);
+            $(obj).select2();
         });
     }
     // $(".itinerarySightseen").on("select2:select", function (e) { 
@@ -2618,6 +2617,7 @@ jQuery(document).on("change", ".tourAttributes", function (e, params) {
   //     }
   //   });
   // });
+var selectedOption;
 
 jQuery(document).on("change", ".commonMultiDrop", function (e, param, values) {
    var select_val = $(e.currentTarget).val();
@@ -2646,7 +2646,6 @@ $(".commonMultiDrop").on("select2:unselecting", function (e, param, values) {
 });
 function multiselectChange(element, data, checked) {
   // console.log(data);
-
     jQuery.each(data, function(index, item) {
         var val = item;
         if (val != "") {
@@ -2657,9 +2656,9 @@ function multiselectChange(element, data, checked) {
               }else{
                 var selected = [];
               }
-              if(jQuery.inArray(val, selected) === -1){
-                selected.push(val);
-              }
+                  if(jQuery.inArray(val, selected) === -1){
+                    selected.push(val);
+                  }
               $(element).closest('.item').find('.termSequence').val(JSON.stringify(selected));
           }else{
             if (termSequence != "") {

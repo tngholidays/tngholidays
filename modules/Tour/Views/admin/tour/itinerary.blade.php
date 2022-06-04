@@ -73,7 +73,7 @@
                                 </div>
 
                                 <div class="col-md-6 ismultiple">
-                                    <select name="itinerary[{{$key}}][term][]" class="form-control uniqueDropDown itinerarySightseen commonMultiDrop multiselectDrop" data-tags="true" data-options='{"placeholder":"-- Select Sightseeings --"}' multiple="multiple">
+                                    <select name="itinerary[{{$key}}][term][]" class="form-control uniqueDropDown itinerarySightseen commonMultiDrop multiselectDrop" data-tags="true" data-options='{"placeholder":"-- Select Sightseeings --"}' data-allow-clear="true" multiple="multiple">
                                             <?php 
                                                 $terms = isset($itinerary['attribute']) ? getTermsByAttr($itinerary['attribute']) : array(); 
                                             ?>
@@ -120,7 +120,7 @@
                 <div class="col-md-12">
                     <div class="row">
                          <div class="col-md-6 ismultiple">
-                            <select __name__="itinerary[__number__][transfer]" class="form-control uniqueDropDown transferDropdown commonMultiDrop multiselectDrop2" data-options='{"placeholder":"-- Select Transfers --"}' multiple="multiple">
+                            <select __name__="itinerary[__number__][transfer][]" class="form-control uniqueDropDown transferDropdown commonMultiDrop multiselectDrop2" data-options='{"placeholder":"-- Select Transfers --"}' multiple="multiple">
                                     <?php $terms = getTermsByAttr(22); ?>
                                     @if(count($terms) > 0)
                                     @foreach ($terms as $term)
@@ -130,7 +130,7 @@
                             </select>
                         </div>
                         <div class="col-md-6 ismultiple">
-                            <select __name__="itinerary[__number__][meal]" class="form-control mealDropdown commonMultiDrop multiselectDrop2" data-options='{"placeholder":"-- Select Meals --"}' multiple="multiple">
+                            <select __name__="itinerary[__number__][meal][]" class="form-control mealDropdown commonMultiDrop multiselectDrop2" data-options='{"placeholder":"-- Select Meals --"}' multiple="multiple">
                                     <?php $terms = getTermsByAttr(24); ?>
                                     @if(count($terms) > 0)
                                     @foreach ($terms as $term)
@@ -156,7 +156,7 @@
                         </div>
                         <div class="col-md-6 ismultiple">
                             
-                            <select __name__="itinerary[__number__][term]" class="form-control uniqueDropDown itinerarySightseen commonMultiDrop multiselectDrop2" data-options='{"placeholder":"-- Select Sightseeings --"}' multiple="multiple">
+                            <select __name__="itinerary[__number__][term][]" class="form-control uniqueDropDown itinerarySightseen commonMultiDrop multiselectDrop2" data-options='{"placeholder":"-- Select Sightseeings --"}' multiple="multiple">
                             </select>
                         </div>
                     </div>

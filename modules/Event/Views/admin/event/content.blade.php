@@ -102,8 +102,8 @@
                 </div>
             </div>
             <?php 
-                $extraAttribute = getAttributeByType(9);
-                $getExtraContentTypes = getTermsByAttr($extraAttribute->id);
+        $extraAttribute = getAttributeByType(9);
+         $getExtraContentTypes = getTermsByAttr($extraAttribute->id);
         ?>
             <div class="card">
                 <div class="card-header">

@@ -357,18 +357,18 @@ class BookingController extends AdminController
             $gmail = new Swift_Mailer($transport);
             // Set the mailer as gmail
             Mail::setSwiftMailer($gmail);
-            $sub = "Confirmation For Activity";
+             $sub = "Confirmation For Activity";
             if (!empty($emails) && count($emails) > 0) {
                 foreach ($emails as $key => $toEmail) {
                     try{
                        Mail::send('Booking::emails.mail-ticket', $data, function( $message ) use ($data, $toEmail, $sub)
                        {
-                          $message->to($toEmail)->from($data['from'])->subject($sub);
+                          $message->to(strtolower($toEmail))->from($data['from'])->subject($sub);
                           $message->attachData($data['pdf'], 'voucher.pdf');
                         });
                     }
                     catch(\Exception $e){
-                        // dd($e);
+                        dd($e);
                     }
                 }
             }
@@ -445,9 +445,12 @@ class BookingController extends AdminController
                }else{
                    $persons += $booking->total_guests;
                }
-              $message = $msg = 'Booking Number: '.$row->booking_id.'%0a Lead Person Name: '.$name.'%0a No. of Person: '.$persons.'%0a Hotel Name: '.$row->hotel_name.'%0a Package: '.$row->package_details.'%0a Date: '.@$row->date.'%0a Time: '.@$row->time;
-              $to = (string)PhoneNumber::make($request->input('phone'))->ofCountry('IN');
-              Sms::to($to)->content($message)->send();
+              if(!empty($request->input('phone'))){
+                $message = $msg = 'Booking Number: '.$row->booking_id.'%0a Lead Person Name: '.$name.'%0a No. of Person: '.$persons.'%0a Hotel Name: '.$row->hotel_name.'%0a Package: '.$row->package_details.'%0a Date: '.@$row->date.'%0a Time: '.@$row->time;
+                $to = (string)PhoneNumber::make($request->input('phone'))->ofCountry('IN');
+                Sms::to($to)->content($message)->send();
+              }
+              
             }
             $row->mail_status = 1;
             $row->save();

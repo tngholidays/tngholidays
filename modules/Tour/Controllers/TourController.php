@@ -124,6 +124,7 @@
                     $dayPlus = "+$noDays day";
                     $hotel['check_in'] = date('d M, Y', strtotime($bookingDate));
                     $hotel['check_out'] = date('d M, Y', strtotime($bookingDate . $dayPlus));
+          
     
                     $date = date('Y-m-d', strtotime($bookingDate . $dayPlus));
                     $bookingDate = date('Y-m-d', strtotime($date));
@@ -133,16 +134,20 @@
     
                     $getBookingData['by_default_hotels'][$key]['check_out'] = $hotel['check_out'];
                     $getBookingData['by_default_hotels'][$key]['check_out'] = $hotel['check_out'];
-                    if (count($getBookingData['default_hotels']) == ($key+1)) {
-                        $days += 1;
-                    }
+                    // if (count($getBookingData['default_hotels']) == ($key+1)) {
+                    //     $days += 1;
+                    // }
                     
                     $days = (int) $days;
                     $array['index'] = $key;
                     $j = 1;
                     // dd($row->itinerary);
                     $row->itinerary = array_combine(range(0, count($row->itinerary)-1), array_values($row->itinerary));
-    
+ 
+                    // if($key == 1){
+                    //     dd($hotel['days']);
+                    // }
+                    
     
                     for ($i=0; $i < $days; $i++) {
                         $dayPlus = "+$k day";

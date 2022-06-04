@@ -166,21 +166,29 @@ class LeadController extends AdminController
                     $path = asset($destinationPath.$fileName);
                 }
                 
-           
-                foreach ($mobileNos as $key => $phone) {
-                    $lead = Enquiry::where('phone', 'LIKE', '%'.$phone.'%')->WhereNotNull('name')->first();
-                    $msg = "Hi ".@$lead->name."%0a";
-                    $msg .= $data['content'];
-                    sleep(20);
-                    if($data['mobile_nos']){
-                        $to = (string)PhoneNumber::make($phone)->ofCountry('IN');
-                        if(!empty($fileName)){
-                            Sms::to($to)->content($msg)->file($path)->send();
-                        }else{
-                            Sms::to($to)->content($msg)->send();
-                        }
-                    }
+                $msg = $data['content'];
+
+                $postData = ['mobileno'=>implode(",",$mobileNos), 'message'=>$msg,'file'=>null];
+                if(!empty($fileName)){
+                    $postData['file'] = $path;
                 }
+                $result = sendWhatsappBulkMsg($postData);
+                
+           
+                // foreach ($mobileNos as $key => $phone) {
+                //     $lead = Enquiry::where('phone', 'LIKE', '%'.$phone.'%')->WhereNotNull('name')->first();
+                //     $msg = "Hi ".@$lead->name."%0a";
+                //     $msg .= $data['content'];
+                //     sleep(20);
+                //     if($data['mobile_nos']){
+                //         $to = (string)PhoneNumber::make($phone)->ofCountry('IN');
+                //         if(!empty($fileName)){
+                //             Sms::to($to)->content($msg)->file($path)->send();
+                //         }else{
+                //             Sms::to($to)->content($msg)->send();
+                //         }
+                //     }
+                // }
 
                 $row = new Campaign();
                 $row->phone = json_encode($mobileNos);

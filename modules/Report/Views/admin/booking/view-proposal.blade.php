@@ -10,7 +10,7 @@
 
 					    <div class="panel-body">
 					    	<?php $version = "?var=".rand(); ?>
-					    	<iframe src="{{ asset('voucher/proposalPDF.pdf') }}{{$version}}" width="100%" height="450px" title="voucher.pdf"></iframe>
+					    	<iframe src="{{ $filepath }}" width="100%" height="450px" title="voucher.pdf"></iframe>
 						</div>
 					</div>
                 </div>

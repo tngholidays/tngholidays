@@ -477,6 +477,7 @@ class Tour extends Bookable
             
 
            
+            
             if ($meta->discount_by_people and !empty($meta->discount_by_people)) {
                 foreach ($meta->discount_by_people as $type) {
                     if ($type['from'] <= $total_guests and (!$type['to'] or $type['to'] >= $total_guests)) {

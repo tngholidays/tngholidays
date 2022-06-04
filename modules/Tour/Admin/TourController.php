@@ -164,7 +164,6 @@
 
         public function edit(Request $request, $id)
         {
-
             $this->checkPermission('tour_update');
             $row = $this->tourClass::find($id);
             if (empty($row)) {

@@ -18,6 +18,7 @@
             </div>
         </div>
     @endif
+    <?php /*
   @if(Route::currentRouteName() == null)
     <div class="modal fade" role="dialog" id="enquiryModel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -34,7 +35,8 @@
         </div>
     </div>
 </div>
+@endif */ ?>
 <div id="tng-widget"></div>
-@endif
+
 
 @endsection

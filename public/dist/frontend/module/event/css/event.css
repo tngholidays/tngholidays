@@ -683,7 +683,7 @@
 @media (max-width: 420px) {
     .bravo_wrap .bravo_detail_event .bravo_content .g-attributes .list-attributes .item {
         flex: 0 0 100%;
-        max-width: 100%;
+        max-width: 50%;
     }
 }
 .bravo_wrap .bravo_detail_event .bravo_content .g-attributes .list-attributes.icon_center .item {
@@ -2289,26 +2289,4 @@
 }
 .bravo_wrap .bravo_detail_event .bravo_single_book .form-content .form-group .person-details p{
 	margin: 0px;
-}
-
-.variant__overview ul li {
-    font-size: 13px;
-    color: #5e6d77;
-    margin-bottom: 20px;
-    list-style: none;
-    position: relative !important;
-    padding: 0 0 0 20px !important;
-}
-.variant__overview ul li:before {
-    content: "";
-    width: 8px;
-    height: 8px;
-    display: inline-block;
-    border-radius: 50%;
-    margin-right: 20px;
-    border: 1px solid #00aeef !important;
-    background-color: #00aeef!important;
-    position: absolute;
-    left: 0;
-    top: 5px;
 }

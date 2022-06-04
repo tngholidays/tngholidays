@@ -17,5 +17,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 Route::post('/chatbot','WhatsAppController@index');
+Route::post('/chatbotv1','WhatsAppController@indexV1');
 Route::get('/uk','WhatsAppController@uk');
 //Route::any('chatbot','\Modules\Api\WhatsAppController@index');

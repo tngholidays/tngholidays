@@ -26,6 +26,7 @@ use Modules\Tour\Models\ManageItinerary;
     use PDF;
     use Mail;
     use Validator;
+    use File;
 
 
 class EnquiryController extends AdminController
@@ -278,7 +279,6 @@ class EnquiryController extends AdminController
     public function storeProposal(Request $request, $id)
         {
             $data = $request->input();
-
             if ($id > 0) {
                 $row = BookingProposal::find($id);
                 if ($data['old_tour_id'] != $data['tour_id']) {
@@ -331,11 +331,15 @@ class EnquiryController extends AdminController
 
            $row = BookingProposal::where("enquiry_id", $id)->first();
            $customTour = $row->tour_details;
+            
            $tour = margeCustomTour($row->tour_id, $customTour);
+           $attributes = \Modules\Core\Models\Terms::getTermsById($customTour['terms']);
+
            $data = [
                'row'               => $row,
                'enquiry'           => $enquiry,
                'terms'             => $customTour['terms'],
+               'attributes'             => $attributes,
                'tour'              => $tour,
                'page_title'            => __("Booking Proposal "),
                'breadcrumbs'       => [
@@ -365,7 +369,7 @@ class EnquiryController extends AdminController
              if ($action != null && !empty($enquiry->email)) {
                $toEmail = $enquiry->email;
                try{
-                  Mail::send('Booking::emails.mail-proposal', $data, function( $message ) use ($data, $toEmail, $output, $filepath)
+                  Mail::send('Booking::emails.mail-proposal', $data, function( $message ) use ($data, $toEmail, $output,$filepath)
                   {
                      $message->to($toEmail)->subject('Booking Proposal');
                      $message->attachData($output, $filepath);
@@ -377,11 +381,12 @@ class EnquiryController extends AdminController
              if ($action != null && !empty($enquiry->phone)) {
                  $to = (string)PhoneNumber::make($enquiry->phone)->ofCountry('IN');
                  $title = 'Proposal for '.$tour->title;
-              //    $version = "?var=".rand(); 
-				          // $pathPDF = asset('voucher/proposalPDF.pdf').$version;
-                 $destinationPath = 'public/voucher/';
+                 //$version = "?var=".rand(); 
+				 //$pathPDF = asset('voucher/proposalPDF.pdf').$version;
+				 $destinationPath = 'public/voucher/';
                  $pathPDF = asset($destinationPath.$file_name);
                  Sms::to($to)->content($title)->file($pathPDF)->send();
+                 
                  if(file_exists($filepath)){
                   File::delete($filepath);
                  }
@@ -508,7 +513,6 @@ class EnquiryController extends AdminController
            $requestData['proposal_id'] = $bookingProposal->id;
            $requestData['custom_tour'] = $bookingProposal->tour_details;
            $requestData['discount_by_people'] = $bookingProposal->discount_by_people;
-           
            $request->merge($requestData);
            $code = $service->addToCartByAdmin($request)->original;
            if ($code['status'] == 0) {

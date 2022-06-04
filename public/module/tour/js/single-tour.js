@@ -1070,7 +1070,7 @@ Vue.component('card3', {
          }
          $('#change_booking_hotel').modal('hide');
          $('#change_booking_room').modal('hide');
-          updateHotels(vuejsArray);
+         updateHotels(vuejsArray);
          totalPrice(vuejsArray, hotelDetail.totalDiffPrice, hotelDetail.rateFlag);
     });
 
@@ -1094,7 +1094,7 @@ Vue.component('card3', {
             default_hotels['modify_in'] = false;
          }
          $('#change_booking_hotel').modal('hide');
-          updateHotels(vuejsArray);
+         updateHotels(vuejsArray);
          totalPrice(vuejsArray, hotelDetail.totalDiffPrice, hotelDetail.rateFlag);
         
     });
@@ -1167,7 +1167,6 @@ Vue.component('card3', {
     });
 
 })(jQuery);
-
 function updateHotels(vuejsArray) {
     console.log(vuejsArray.itineraries);
         var ii = 0;

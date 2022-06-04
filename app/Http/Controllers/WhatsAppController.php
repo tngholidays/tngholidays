@@ -265,6 +265,130 @@ class WhatsAppController extends Controller
 
     }
 
+    private function enqueryV1($id)
+    {
+
+        $destination=0;
+        $whatappdata=Whatsapp::where('id',$id)->first();
+
+
+        if($whatappdata->lead_id==0)
+        {
+            $destination="";
+            $duration="";
+            $adult=$whatappdata->adult;
+            $child=$whatappdata->child;
+            $kids=$whatappdata->kids;
+            $date=$whatappdata->travel_date;
+
+            //$duration=$this->getdata($id,'Duration');
+           // $adult=$this->getdata($id,'Adult');
+           // $child=$this->getdata($id,'Child');
+           // $kids=$this->getdata($id,'Kids');
+           // $date=$this->getdata($id,'Travel Date');
+           // $city=$this->getdata($id,'City');
+           if($whatappdata->city!="")
+           {
+             $data=DB::table('bravo_locations')->where('name',trim($whatappdata->city))->where('deleted_at',null)->first();
+             if($data)
+             {
+                 $destination=$data->id;
+             }
+           }
+
+            if($whatappdata->package!="")
+            {
+                $data=DB::table('bravo_terms')->where('name', 'LIKE', '%'.trim($whatappdata->package).'%')->where('deleted_at',null)->first();
+                if($data)
+                {
+                    $duration=$data->id;
+                }
+
+
+            }
+
+            $person_type='[{"name":"Adult","number":"'.(int)$adult.'"},{"name":"Child","number":"'.(int)$child.'"},{"name":"Kid","number":"'.(int)$kids.'"}]';
+
+            $lead_id=DB::table('bravo_enquiries')->insertGetId([
+                'object_model' => 'tour',
+                'name' => @$whatappdata->name,
+                'phone'=>@$whatappdata->mobile,
+             //   'city'=>$city,
+               // 'approx_date'=>$date,
+               // 'num_of_person'=>(int)$adult,
+               // 'destination'=>(int)$destination,
+               // 'duration'=>(int)$duration,
+                'object_id'=>0,
+                'vendor_id'=>1,
+                'status'=>'pending',
+                'create_user'=>'1',
+              //  'person_types'=>$person_type,
+                'created_at'=>date("Y-m-d H:i:s"),
+                'updated_at'=>date("Y-m-d H:i:s"),
+            ]);
+
+            Whatsapp::where('id',$id)->update(['lead_id'=>$lead_id]);
+
+        }
+        else
+        {
+            $destination="";
+            $duration="";
+            $adult=$whatappdata->adult;
+            $child=$whatappdata->child;
+            $kids=$whatappdata->kids;
+            $date=$whatappdata->travel_date;
+            $city="";
+
+            if($whatappdata->city!="")
+             {
+               $data=DB::table('bravo_locations')->where('name',trim($whatappdata->city))->where('deleted_at',null)->first();
+               if($data)
+               {
+                   $destination=$data->id;
+               }
+             }
+
+              if($whatappdata->package!="")
+              {
+                  $data=DB::table('bravo_terms')->where('name', 'LIKE', '%'.trim($whatappdata->package).'%')->where('deleted_at',null)->first();
+                  if($data)
+                  {
+                      $duration=$data->id;
+                  }
+
+
+              }
+
+
+
+            $person_type='[{"name":"Adult","number":"'.(int)$adult.'"},{"name":"Child","number":"'.(int)$child.'"},{"name":"Kid","number":"'.(int)$kids.'"}]';
+
+            DB::table('bravo_enquiries')->where("id",$whatappdata->lead_id)->update([
+                'object_model' => 'tour',
+                'name' => @$whatappdata->name,
+                'phone'=>@$whatappdata->mobile,
+                'city'=>$city,
+                'approx_date'=>$date,
+                'num_of_person'=>(int)$adult,
+                'destination'=>(int)$destination,
+                'duration'=>(int)$duration,
+                'object_id'=>0,
+                'vendor_id'=>1,
+                'status'=>'pending',
+                'create_user'=>'1',
+                'person_types'=>$person_type,
+                'created_at'=>date("Y-m-d H:i:s"),
+                'updated_at'=>date("Y-m-d H:i:s"),
+            ]);
+        }
+
+      // echo $destination;die("OK");
+
+
+
+    }
+
     public function getdata1($id,$question)
     {
         $msg='';
@@ -288,6 +412,224 @@ class WhatsAppController extends Controller
       return $msg;
     }
     public function index(Request $request)
+    {
+           $input =Input::all();
+           $data=json_decode($request->data);
+           $output=array();
+           $result='';
+
+          if (array_key_exists("messages",$data))
+           {
+
+              $message=$data->messages[0];
+              $mobileno=(int)@$message->key->remoteJid;
+              $jid=@$message->key->remoteJid;
+              $msg=@$message->message->conversation;
+              $msgdata=@$message->message;
+              {
+                   $result=$this->start($message);
+                   if($result['status'])
+                   {
+                            //$mobileno=(int)$message->chatId;
+                           $output['args']=array('to'=>$mobileno,'content'=>$result['data']);
+                           Whatsapp::Send('Text',$output);
+                           if($result['update']=='1.7')
+                           {
+                               Whatsapp::where('username',$message->chatId)->update(['command'=>'1.7']);
+
+                           }
+                           if(substr_count($result['data'],'Thanks for Enquiry about'))
+                           {
+                             Whatsapp::where('username',$data->chatId)->update(['command'=>'9','lead_id'=>0]);
+                           }
+                           //  $tt['args']=array('to'=>'9950448844','content'=>json_encode($result));
+                            // Whatsapp::Send('Text',$tt);
+
+               }
+                  // mail("un@unv7.com","demo",json_encode($result));
+               }
+            }
+           //mail('un@unv7.com','welcomedemo',json_encode($request));
+    }
+
+    public function indexV1(Request $request)
+    {
+      try
+      {
+       $response=array();
+       $data=json_decode($request->data);
+
+       if (array_key_exists("messages",$data))
+        {
+
+          $message=$data->messages[0];
+
+          $mobileno=(int)@$message->key->remoteJid;
+          $jid=@$message->key->remoteJid;
+          $msg=@$message->message->conversation;
+          $msgdata=@$message->message;
+
+          $fromme=@$message->key->fromMe;
+
+
+          if($mobileno!="" && !$fromme)
+          {
+            if(strlen($mobileno) >10)
+             {
+               $mobileno=(int)substr($mobileno, 2);
+             }
+            $response['mobileno']=$mobileno;
+
+            if (@array_key_exists("buttonsResponseMessage",$msgdata))
+            {
+
+              $buttonid=@$msgdata->buttonsResponseMessage->selectedButtonId;
+              if($buttonid!="")
+              {
+                $buttonarr=explode('~', $buttonid);
+                $action=$buttonarr[0];
+                $value=$buttonarr[1];
+                $whatsappdata=Whatsapp::where('username',$jid)->first();
+                if($whatsappdata->command==8)
+                {
+
+                    $response['data']=$this->NameDetail($jid,$value,$data);
+
+                }
+
+              }
+             /// $response['data']=ChatBotV1::buttonsResponseMessage($user_id,$mobileno,$buttonid,$data);
+              $response['jid']=$jid;
+              $response['replyStatus']  = true;
+            }
+            elseif(@array_key_exists("listResponseMessage",$msgdata))
+            {
+
+              $buttonid=@$msgdata->listResponseMessage->singleSelectReply->selectedRowId;
+              if($buttonid!="")
+              {
+                $buttonarr=explode('~', $buttonid);
+                $action=$buttonarr[0];
+                $value=$buttonarr[1];
+
+                switch ($action) {
+                  case 'City':
+                    $response['data']=$this::CityDetail($jid,$value,$msgdata);
+                    break;
+                  case 'Package':
+                    $response['data']=$this::PackageDetail($jid,$value,$msgdata);
+                    break;
+                  case 'Adult':
+                    $response['data']=$this::AdultDetail($jid,$value,$msgdata);
+                    break;
+                  case 'Child':
+                    $response['data']=$this::ChildDetail($jid,$value,$msgdata);
+                    break;
+                  case 'Kids':
+                    $response['data']=$this::KidsDetail($jid,$value,$msgdata);
+                    break;
+                  case 'Name':
+                    $response['data']=$this::NameDetail($jid,$value,$data);
+                    break;
+                  default:
+                    $response['data']=$this->WelcomeMessageV1($mobileno,$msg,$data);
+                }
+              }
+            //  $response['data']=ChatBotV1::listResponseMessage($user_id,$mobileno,$buttonid,$data);
+              $response['jid']=$jid;
+              $response['replyStatus']  = true;
+            }
+            else
+            {
+               if($msg=="")
+                {
+                 $msg=@$message->message->extendedTextMessage->text;
+
+                }
+              $whatsappdata=Whatsapp::where('username',$jid)->first();
+              if($whatsappdata)
+              {
+                if($whatsappdata->command==7)
+                {
+                   $response['data']=$this->DateDetail($jid,$msg,$data);
+                }
+                if($whatsappdata->command==9)
+                {
+                  $response['data']=$this->NameDetail($jid,$msg,$data);
+                }
+                else
+                {
+                  if($msg=="hi"||$msg=="0"||$msg=="Hi"||$msg=="Hello")
+                  {
+                    $response['data']=$this->WelcomeMessageV1($mobileno,$msg,$data);
+
+                  }
+                  elseif(substr_count($msg,'Facebook'))
+                  {
+                    $response['data']=$this->WelcomeMessageV1($mobileno,$msg,$data);
+                  }
+                }
+
+              }
+              else
+              {
+                $response['data']=$this->WelcomeMessageV1($mobileno,$msg,$data);
+
+              }
+              $response['jid']=$jid;
+              $response['replyStatus']  = true;
+
+
+            }
+
+          }
+          else
+          {
+            if($fromme)
+            {
+                if(strlen($mobileno) >10)
+                 {
+                   $mobileno=(int)substr($mobileno, 2);
+                 }
+                $response['mobileno']=$mobileno;
+
+                if (array_key_exists("buttonsResponseMessage",$msgdata))
+                {
+
+                 echo $buttonid=@$msgdata->buttonsResponseMessage->selectedButtonId;die("ok");
+                 /// $response['data']=ChatBotV1::buttonsResponseMessage($user_id,$mobileno,$buttonid,$data);
+                  $response['jid']=$jid;
+                  $response['replyStatus']  = true;
+                }
+            }
+
+          }
+
+
+
+        }
+      }
+      catch (\Illuminate\Database\QueryException $e)
+        {
+
+         $response['replyMessage'] = "Error IN Query : ".$e->getMessage();
+         $response['replyStatus']  = false;
+        }
+        catch (PDOException $e)
+        {
+         $response['replyMessage'] = "Error IN Query : ".$e->getMessage();
+         $response['replyStatus']  = false;
+        }
+        catch (\Exception $e)
+        {
+
+        $response['replyMessage'] = $e->getMessage().'::::'.$e->getLine();
+        $response['replyStatus']  = false;
+        }
+
+      return $response;
+    }
+    public function indexold(Request $request)
     {
            $input =Input::all();
            $request=(object)json_decode($input['data']);
@@ -332,27 +674,31 @@ class WhatsAppController extends Controller
         $input=array();
         $temp=true;
         $todo='';
-        $message=@$data->body;
+
+        $message=$data->message->conversation;
+        $mobileno=(int)@$message1->key->remoteJid;
+        $jid=@$message1->key->remoteJid;
+        $msgdata=@$message1->message;
         $condtion=null;;
         $output['update']=0;
 
         try{
             if(substr_count(strtolower($message), 'thailand'))
             {
-                Whatsapp::DataInsert($data);
+                Whatsapp::DataInsertV1($data);
                 $message=0;
             }
             else
             {
                 if(substr_count(strtolower($message), 'maldives'))
                 {
-                   Whatsapp::DataInsert($data);
+                   Whatsapp::DataInsertV1($data);
                     $message=1;
                    /// Whatsapp::where('username',$data->chatId)->update(['command'=>'2']);
                 }
                 elseif(substr_count(strtolower($message), 'dubai'))
                 {
-                  Whatsapp::DataInsert($data);
+                  Whatsapp::DataInsertV1($data);
                    $message=2;
                    //Whatsapp::where('username',$data->chatId)->update(['command'=>'3']);
                 }
@@ -362,7 +708,7 @@ class WhatsAppController extends Controller
 
                    $message=3;
 
-                   Whatsapp::DataInsert($data);
+                   Whatsapp::DataInsertV1($data);
                    //Whatsapp::where('username',$data->chatId)->update(['command'=>'4']);
                 }
 
@@ -374,10 +720,10 @@ class WhatsAppController extends Controller
                 $condtion=$message;
                 if($message=='9')
                 {
-                    Whatsapp::where('username',$data->chatId)->update(['command'=>'9','lead_id'=>'0']);
+                    Whatsapp::where('username',$jid)->update(['command'=>'9','lead_id'=>'0']);
                 }
 
-                $whatappdata=Whatsapp::where('username',$data->chatId)->first();
+                $whatappdata=Whatsapp::where('username',$jid)->first();
 
                 if($whatappdata)
                 {
@@ -391,7 +737,7 @@ class WhatsAppController extends Controller
                         if($message > 0 && $message!=9)
                         {
                             $this->enquery($whatappdata->id);
-                            $whatappdata=Whatsapp::where('username',$data->chatId)->first();
+                            $whatappdata=Whatsapp::where('username',$jid)->first();
                             $condtion='1.1';
                             $obj = new ChatbotData();
                              $obj->wa_id= $whatappdata->id;
@@ -400,13 +746,13 @@ class WhatsAppController extends Controller
                              $obj->answer=@$this->destination[$message];
                              $obj->save();
 
-                            $mobileno=explode('@', $data->chatId);
+                            $mobileno=explode('@', $jid);
                             $mobileno=substr($mobileno[0],2);
                         }
                     }
                 }
 
-                $whatappdata=Whatsapp::where('username',$data->chatId)->first();
+                $whatappdata=Whatsapp::where('username',$jid)->first();
                 if($condtion=='1.1')
                 {
 
@@ -465,8 +811,8 @@ class WhatsAppController extends Controller
               //die();
                 if($temp)
                 {
-                    Whatsapp::DataInsert($data);
-                    $whatappdata=Whatsapp::where('username',$data->chatId)->first();
+                    Whatsapp::DataInsertV1($data);
+                    $whatappdata=Whatsapp::where('username',$jid)->first();
                 switch ($condtion) {
                     case 0:
                         if($message==0)
@@ -478,7 +824,7 @@ class WhatsAppController extends Controller
                              $obj->answer=@$this->destination[$message];
                              $obj->save();
 
-                            $mobileno=explode('@', $data->chatId);
+                            $mobileno=explode('@', $jid);
                             $mobileno=substr($mobileno[0],2);
 
 
@@ -489,7 +835,7 @@ class WhatsAppController extends Controller
                                 $msg.="\n".$this->num[$key]."👉 ".$val;
                             }
                             $output['data']=$msg."\n\n9️⃣ 👉 Main Menu";
-                            Whatsapp::where('username',$data->chatId)->update(['command'=>'1.1']);
+                            Whatsapp::where('username',$jid)->update(['command'=>'1.1']);
                             //$output['data']="Enter Your Order No.";
 
                         }
@@ -515,7 +861,7 @@ class WhatsAppController extends Controller
                              $msg.="\n".$this->num[$key]."👉 ".$val;
                          }
                         $output['data']=$msg."\n\n9️⃣ 👉 Main Menu";
-                        Whatsapp::where('username',$data->chatId)->update(['command'=>'1.2']);
+                        Whatsapp::where('username',$jid)->update(['command'=>'1.2']);
                         break;
                     case 1.2:
                          $obj = new ChatbotData();
@@ -545,7 +891,7 @@ class WhatsAppController extends Controller
                              $msg.="\n".$this->num[$i]."👉 ".$i." Child";
                          }
                         $output['data']=$msg."\n\n9️⃣ 👉 Main Menu";
-                        Whatsapp::where('username',$data->chatId)->update(['command'=>'1.4']);
+                        Whatsapp::where('username',$jid)->update(['command'=>'1.4']);
                         break;
                     case 1.4:
                          $obj = new ChatbotData();
@@ -574,7 +920,7 @@ class WhatsAppController extends Controller
                          $obj->save();
                         $msg="Approx Travel Date and Month(Example 1/10/2021)\nअनुमानित यात्रा तिथि और माह (उदाहरण 1/10/2021)\n";
                         $output['data']=$msg;
-                        Whatsapp::where('username',$data->chatId)->update(['command'=>'1.6']);
+                        Whatsapp::where('username',$jid)->update(['command'=>'1.6']);
                         break;
                     case 1.6:
                          $obj = new ChatbotData();
@@ -586,7 +932,7 @@ class WhatsAppController extends Controller
 
 
                          $output['data']="What is your name?";
-                        Whatsapp::where('username',$data->chatId)->update(['command'=>'1.7']);
+                        Whatsapp::where('username',$jid)->update(['command'=>'1.7']);
                         break;
                     case 9:
                         $output['data']=$this->WelcomeMessage($data);
@@ -601,7 +947,7 @@ class WhatsAppController extends Controller
             {
 
                 $condtion=$message;
-                $username=@$data->chatId;
+                $username=@$jid;
                 $whatappdata=Whatsapp::where('username',$username)->first();
                 if($whatappdata)
                 {
@@ -620,7 +966,7 @@ class WhatsAppController extends Controller
                     }
                     elseif($whatappdata->command=='1.7')
                     {
-                        Whatsapp::where('username',$data->chatId)->update(['name'=>$message]);
+                        Whatsapp::where('username',$jid)->update(['name'=>$message]);
                         $destination=$this->getdata($whatappdata->id,'Destination');
                         $duration=$this->getdata($whatappdata->id,'Duration');
                         $adult=$this->getdata($whatappdata->id,'Adult');
@@ -643,14 +989,14 @@ class WhatsAppController extends Controller
                         //"\n\n9️⃣ 👉 Main Menu";
 
                         $final=array();
-                        $mobileno=(int)$data->chatId;
+                        $mobileno=(int)$jid;
                         $final['args']=array('to'=>$mobileno,'content'=>"#0");
                          Whatsapp::Send('Text',$final);
 
 
                         $this->enquery($whatappdata->id);
                         //Whatsapp::where('username',$data->chatId)->update(['command'=>'9']);
-                        Whatsapp::where('username',$data->chatId)->update(['command'=>'9','lead_id'=>0]);
+                        Whatsapp::where('username',$jid)->update(['command'=>'9','lead_id'=>0]);
                     }
                     elseif($whatappdata->command=='1.1')
                     {
@@ -667,12 +1013,12 @@ class WhatsAppController extends Controller
 
                     else
                     {
-                        $output['data']=$this->WelcomeMessage($data);
+                        $output['data']=$this->WelcomeMessageV1($data);
                     }
                 }
                 else
                {
-                   $output['data']=$this->WelcomeMessage($data);
+                   $output['data']=$this->WelcomeMessageV1($data);
                }
 
                }
@@ -700,9 +1046,9 @@ class WhatsAppController extends Controller
     private function WelcomeMessage($data)
     {
         Whatsapp::DataInsert($data);
-        Whatsapp::where('username',$data->chatId)->update(['command'=>'9']);
+        Whatsapp::where('username',$data->chatId)->update(['command'=>'1']);
         $whatappdata=Whatsapp::where('username',$data->chatId)->first();
-        $this->enquery($whatappdata->id);
+        $this->enqueryV1($whatappdata->id);
         //Whatsapp::where('username',$data->chatId)->update(['command'=>'9','lead_id'=>0]);
         $name=@$data->sender->pushname;
         if($name=="")
@@ -710,6 +1056,15 @@ class WhatsAppController extends Controller
             $name=@$data->sender->name;
         }
         $whatappdata=Whatsapp::where('username',$data->chatId)->first();
+        if($whatappdata)
+        {
+          $obj = new ChatbotData();
+           $obj->wa_id= $whatappdata->id;
+           $obj->lead_id=$whatappdata->lead_id;
+           $obj->question='Destination';
+           $obj->answer="Thailand";
+           $obj->save();
+        }
 
 
         $msg= "Hi ".$name."\n*TNG Holidays* में आपका स्वागत है\n\nEnter any options Below Destination (Example for Thailand Type 0)\nगंतव्य के लिए नीचे से कोई भी विकल्प दर्ज करें (उदाहरण के लिए अगर आपको थाईलैंड जाना है तो टाइप करे 0)";
@@ -719,6 +1074,272 @@ class WhatsAppController extends Controller
         }
         return $msg;
     }
+    private function WelcomeMessageV1($mobileno,$msg,$data)
+    {
+        $output=array();
+        Whatsapp::DataInsertV1($mobileno,$data);
+
+        $message=$data->messages[0];
+
+        $jid=@$message->key->remoteJid;
+        $msgdata=@$message->message;
+        $name=@$message->pushName;
+        Whatsapp::where('username',$jid)->update(['command'=>'2']);
+        $whatappdata=Whatsapp::where('username',$jid)->first();
+        $this->enqueryV1($whatappdata->id);
+
+        $msg= "Hi ".$name."\n*TNG Holidays* में आपका स्वागत है\n\nEnter any options Below Destination \nगंतव्य के लिए नीचे से कोई भी विकल्प दर्ज करें\n\n";
+        //$msg.="Which City Your want to Travel. (Example for Pattaya Type 0)\nआप किस शहर की यात्रा करना चाहते हैं। (उदहारण के लिए अगर पटाया जाना है तो टाइप करे 0)\n";
+        $button=array();
+        $key1=0;
+        $button[$key1 ]['title']="Destination";
+        foreach($this->thailanddestination as $key=>$val)
+        {
+          $button[$key1 ]['rows'][]=array('title'=>$val,'rowId'=>'City~'.$val,'description'=>"");
+        }
+
+         $output['btn']=$button;
+         $output['type']='menu';
+         $output['title']="TNG Holidays";
+         $output['text']=$msg;
+         $output['footer']='Best Deals in Thailand Activites and Tour Packages https://tngholidays.com/';
+         $output['subTitle']='tngholidays.com';
+         $output['menucaption']='Choose Any One City';
+         $output['status']  = true;
+
+        return $output;
+    }
+
+    private function CityDetail($jid,$city,$msgbody)
+    {
+
+      $output=array();
+
+      $whatappdata=Whatsapp::where('username',$jid)->first();
+      if($whatappdata)
+      {
+        Whatsapp::where('username',$jid)->update(['command'=>'3','city'=>$city]);
+      }
+      $this->enqueryV1($whatappdata->id);
+      $msg="Duration of Travel Package (Example for 3Nights 4 Days) \nयात्रा पैकेज की अवधि (उदाहरण के लिए अगर 3 रातें 4 दिन)\n\n";
+
+
+      $button=array();
+      $button[0]['title']="Travel Package";
+      foreach($this->duration as $key=>$val)
+      {
+        $button[0]['rows'][]=array('title'=>$val,'rowId'=>"Package~".$val);
+      }
+
+       $output['btn']=$button;
+       $output['type']='menu';
+       $output['title']="Travel Package";
+       $output['text']=$msg;
+       $output['footer']='Best Deals in Thailand Activites and Tour Packages https://tngholidays.com/';
+       $output['subTitle']='tngholidays.com';
+       $output['menucaption']='Choose Any One Travel Package';
+
+      return $output;
+
+    }
+
+    private function PackageDetail($jid,$package,$msgbody)
+    {
+
+      $output=array();
+
+      $whatappdata=Whatsapp::where('username',$jid)->first();
+      if($whatappdata)
+      {
+        Whatsapp::where('username',$jid)->update(['command'=>'4','package'=>$package]);
+      }
+      $this->enqueryV1($whatappdata->id);
+      $msg="How Many Adult  want to travel\nकितने वयस्क यात्रा करना चाहते हैं\n";
+
+      $button=array();
+      $button[0]['title']="Adult Person";
+      foreach($this->adult as $key=>$val)
+      {
+        $button[0]['rows'][]=array('title'=>$val,'rowId'=>"Adult~".$val);
+      }
+
+       $output['btn']=$button;
+       $output['type']='menu';
+       $output['title']="Adult Person ";
+       $output['text']=$msg;
+       $output['footer']='Best Deals in Thailand Activites and Tour Packages https://tngholidays.com/';
+       $output['subTitle']='tngholidays.com';
+       $output['menucaption']='Choose How Many Adult to travel';
+
+      return $output;
+
+    }
+    private function AdultDetail($jid,$adult,$msgbody)
+    {
+
+      $output=array();
+
+      $whatappdata=Whatsapp::where('username',$jid)->first();
+      if($whatappdata)
+      {
+        Whatsapp::where('username',$jid)->update(['command'=>'5','adult'=>$adult]);
+      }
+      $this->enqueryV1($whatappdata->id);
+      $msg="How Many Child want to travel \nकितने बच्चे यात्रा करना चाहते हैं\n";
+      $button=array();
+      $button[0]['title']="Child";
+      for($i=0;$i!=5;$i++)
+      {
+        $button[0]['rows'][]=array('title'=>$i.' Child','rowId'=>"Child~".$i);
+      }
+
+       $output['btn']=$button;
+       $output['type']='menu';
+       $output['title']="Child";
+       $output['text']=$msg;
+       $output['footer']='Best Deals in Thailand Activites and Tour Packages https://tngholidays.com/';
+       $output['subTitle']='tngholidays.com';
+       $output['menucaption']='Choose How Many Child to travel';
+
+      return $output;
+
+    }
+    private function ChildDetail($jid,$child,$msgbody)
+    {
+
+      $output=array();
+
+      $whatappdata=Whatsapp::where('username',$jid)->first();
+      if($whatappdata)
+      {
+        Whatsapp::where('username',$jid)->update(['command'=>'6','child'=>$child]);
+      }
+      $this->enqueryV1($whatappdata->id);
+      $msg="How Many Kids want to travel\nकितने शिशु यात्रा करना चाहते हैं\n";
+
+      $button=array();
+      $button[0]['title']="Kids";
+      for($i=0;$i!=5;$i++)
+      {
+        if($i > 1)
+        {
+          $button[0]['rows'][]=array('title'=>$i.' Kids','rowId'=>"Kids~".$i);
+        }
+        else
+        {
+          $button[0]['rows'][]=array('title'=>$i.' Kid','rowId'=>"Kids~".$i);
+        }
+
+      }
+
+       $output['btn']=$button;
+       $output['type']='menu';
+       $output['title']="Kids";
+       $output['text']=$msg;
+       $output['footer']='Best Deals in Thailand Activites and Tour Packages https://tngholidays.com/';
+       $output['subTitle']='tngholidays.com';
+       $output['menucaption']='Choose How Many Kids to travel';
+       return $output;
+
+    }
+    private function KidsDetail($jid,$kids,$msgbody)
+    {
+
+      $output=array();
+      Whatsapp::where('username',$jid)->update(['command'=>'7']);
+      $whatappdata=Whatsapp::where('username',$jid)->first();
+      if($whatappdata)
+      {
+        Whatsapp::where('username',$jid)->update(['command'=>'7','kids'=>$kids]);
+      }
+      $this->enqueryV1($whatappdata->id);
+      $msg="Approx Travel Date and Month(Example 1/10/2022)\nअनुमानित यात्रा तिथि और माह (उदाहरण 1/10/2022)\n";
+      $output['type']='Text';
+      $output['data']='';
+      $output['msg']=$msg;
+      $output['status']  = true;
+      return $output;
+
+    }
+
+    private function DateDetail($jid,$date,$msgbody)
+    {
+
+      $output=array();
+
+
+      {
+        Whatsapp::where('username',$jid)->update(['command'=>'8','travel_date'=>$date]);
+      }
+      $whatappdata=Whatsapp::where('username',$jid)->first();
+      $this->enqueryV1($whatappdata->id);
+      $name=@$msgbody->messages[0]->pushName;
+      $arrbtn=array();
+      $arrbtn[]=array('buttonId'=> 'Name~Yes', 'buttonText'=>array('displayText'=>"Yes i am ".$name), 'type'=> 1);
+      $arrbtn[]=array('buttonId'=> 'Name~No', 'buttonText'=>array('displayText'=>"No"), 'type'=> 1);
+
+
+      $output['type']='button';
+      $output['msg']="What is your name ?";
+      $output['btn']=$arrbtn;
+      $output['status']  = true;
+      return $output;
+
+    }
+
+    private function NameDetail($jid,$answer,$msgbody)
+    {
+       $output=array();
+
+      if($answer=="No")
+      {
+        Whatsapp::where('username',$jid)->update(['command'=>'9']);
+        $msg="Enter your name";
+        $output['type']='Text';
+        $output['data']='';
+        $output['msg']=$msg;
+        $output['status']  = true;
+        return $output;
+      }
+      else
+      {
+        $whatappdata=Whatsapp::where('username',$jid)->first();
+        if($whatappdata->command==8)
+        {
+
+           $name=@$msgbody->messages[0]->pushName;
+          //echo "demo";die();
+          Whatsapp::where('username',$jid)->update(['command'=>'0','name'=>$name]);
+        }
+        else
+        {
+          Whatsapp::where('username',$jid)->update(['command'=>'0','name'=>$answer]);
+        }
+
+
+        $this->enqueryV1($whatappdata->id);
+        $msg = "Thanks for Enquiry about \n*Destination:* ".$whatappdata->city."\n *Duration:* ".$whatappdata->package."\n *No. of Person:* ".$whatappdata->adult."\n *Approx Journey Date:* ".$whatappdata->travel_date."\nWe will get back soon with best quotation.";
+        $button= array();
+        $button[0]['index']="1";
+        $button[0]['callButton']=array('displayText'=>"Call To Expert",'phoneNumber'=>'+917823070707');
+        $button[1]['index']="2";
+        $button[1]['urlButton']=array('displayText'=>"TNG Holidays",'url'=>'https://tngholidays.com/');
+
+
+         $output['msg']=$msg;
+         $output['footer']="www.tngholidays.com";
+         $output['type']='link';
+         $output['btn']=$button;
+         $output['status']  = true;
+         return $output;
+
+      }
+    }
+
+
+
+
+
 
 
 }

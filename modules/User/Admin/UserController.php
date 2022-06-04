@@ -40,7 +40,7 @@ class UserController extends AdminController
         }
         $listUser->with(['wallet']);
         $data = [
-            'rows' => $listUser->paginate(20),
+            'rows' => $listUser->paginate(100),
             'roles' => Role::all()
         ];
         return view('User::admin.index', $data);

@@ -609,7 +609,7 @@ img {
                                                                 </p>
                                                                 <p class="font12 lineHeight18 appendBottom10">@{{default_hotels[type.index].location_name}}</p>
                                                             </div>
-                                                            <div class="font12 latoBold">
+                                                            <div class="font12 latoBold" v-if="!default_hotels[type.index].remove_status">
                                                                 <a href="javascript:void(0);" class="change-btn change-hotel" @click="openHotelsModel($event, type.index)">Change Hotel</a>
                                                             </div>
                                                         </div>
@@ -687,7 +687,7 @@ img {
                                                                     </p>
                                                                     <p class="font12 lineHeight18 appendBottom10">@{{default_hotels[type.index].location_name}}</p>
                                                                 </div>
-                                                                <div class="font12 latoBold">
+                                                                <div class="font12 latoBold" v-if="!default_hotels[type.index].remove_status">
                                                                     <a href="javascript:void(0);" class="change-btn change-hotel" @click="openHotelsModel($event, type.index)">Change Hotel</a>
                                                                 </div>
                                                             </div>

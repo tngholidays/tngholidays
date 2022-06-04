@@ -44,7 +44,7 @@
      <div class="tourFacilities clear">
         <div class="list-star">
             <ul class="booking-item-rating-stars">
-            @if(!empty($attributes) and count($attributes[2]) > 0 && count($attributes[2]['child']) > 0)
+            @if(!empty($attributes) and isset($attributes[2]) and count($attributes[2]) > 0 && count($attributes[2]['child']) > 0)
                 @foreach($attributes[2]['child'] as $term )
                 <li><i class="{{ $term->icon ?? "icofont-check-circled icon-default" }}"></i></li>
                 @endforeach

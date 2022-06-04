@@ -109,7 +109,43 @@ class Whatsapp extends Model
            }
            
         
-      }    
+      } 
+    public static function DataInsertV1($mobileno1,$data){
+            
+              
+               $message=$data->messages[0];
+               $jid=@$message->key->remoteJid;
+               
+               $whatappdata=Whatsapp::where('username',$jid)->first();
+               $mobileno=(int)$jid;
+               $mobileno=substr($mobileno,2);
+               $msgdata=@$message->message;
+               $name=@$message->pushName;
+               $msg=@$message->message->conversation;
+               $command=(is_numeric($msg))?$msg:0;
+               if($whatappdata)
+               {
+                 $input['name']=$name;
+                 $input['mobile']=$mobileno;
+                 $input['command']=$command;
+                 $input['data']=json_encode($data);;
+                 Whatsapp::where('username',$jid)->update($input);
+                 
+               }
+               else{
+                 
+                 $Whatsapp = new Whatsapp();
+                 $Whatsapp->name= $name;
+                 $Whatsapp->mobile= $mobileno;
+                 $Whatsapp->command=$command;
+                 $Whatsapp->data=json_encode($data);
+                 $Whatsapp->username= $jid;
+                 $Whatsapp->save();
+                
+               }
+               
+            
+          }       
 
 }
 

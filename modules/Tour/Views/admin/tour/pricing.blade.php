@@ -59,7 +59,7 @@
         @if(is_default_lang())
             <h3 class="panel-body-title">{{__('Person Types')}}</h3>
             <div class="form-group">
-                <label><input type="checkbox" name="enable_person_types" checked value="1"> {{__('Enable Person Types')}}
+                <label><input type="checkbox" name="enable_person_types" @if(!empty($row->meta->enable_person_types)) checked @endif value="1"> {{__('Enable Person Types')}}
                 </label>
             </div>
             <div class="form-group-item" data-condition="enable_person_types:is(1)">
@@ -109,10 +109,9 @@
                                 </div>
                             </div>
                         @endforeach
-
-                    @else
+                        @else
                     <?php 
-                       $default_person_types = array(['name'=>'Adult','desc'=>'Age 12+','min'=>2,'max'=>20],['name'=>'Child','desc'=>'Age 6-12','min'=>null,'max'=>null]);
+                      $default_person_types = array(['name'=>'Adult','desc'=>'Age 12+','min'=>2,'max'=>20],['name'=>'Child','desc'=>'Age 6-12','min'=>null,'max'=>null]);
                     ?>
                     @foreach($default_person_types as $key=>$person_type)
                             <div class="item" data-number="{{$key}}">
@@ -147,7 +146,6 @@
                                 </div>
                             </div>
                         @endforeach
-
                     @endif
                 </div>
                 <div class="text-right">
@@ -359,6 +357,9 @@
                                         <input type="text" min="0" name="default_hotels[{{$key}}][total_price]" class="form-control totalPrice" value="{{$default_hotels['total_price']}}" readonly>
                                         <span class="btn btn-danger btn-sm btn-remove-item"><i class="fa fa-trash"></i></span>
                                          </div>
+                                         <label>
+                                            <input type="checkbox" name="default_hotels[{{$key}}][remove_status]" @if(isset($default_hotels['remove_status']) && !empty($default_hotels['remove_status'])) checked @endif value="1"> {{__("Disable Remove")}}
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -412,6 +413,10 @@
                                 <input type="text" min="0" __name__="default_hotels[__number__][total_price]" class="form-control totalPrice" value="" readonly>
                                 <span class="btn btn-danger btn-sm btn-remove-item"><i class="fa fa-trash"></i></span>
                                 </div>
+                                <label>
+                                    <input type="checkbox"  __name__="default_hotels[__number__][remove_status]" value="1" >
+                                    {{__("Disable Remove")}}
+                                </label>
                             </div>
                         </div>
                     </div>
