@@ -1,0 +1,35 @@
+
+RewriteOptions inherit
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+RewriteEngine On
+RewriteCond %{SERVER_PORT} 80
+RewriteRule ^(.*)$ https://tngholidays.com/$1 [R,L]
+
+# php -- BEGIN cPanel-generated handler, do not edit
+# Set the “ea-php72” package as the default “PHP” programming language.
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php72 .php .php7 .phtml
+</IfModule>
+# php -- END cPanel-generated handler, do not edit
+
+RewriteCond %{HTTP_REFERER} !^$
+RewriteCond %{HTTP_REFERER} !^http://tngholidays.com/.*$      [NC]
+RewriteCond %{HTTP_REFERER} !^http://tngholidays.com$      [NC]
+RewriteCond %{HTTP_REFERER} !^http://www.tngholidays.com/.*$      [NC]
+RewriteCond %{HTTP_REFERER} !^http://www.tngholidays.com$      [NC]
+RewriteCond %{HTTP_REFERER} !^https://tngholidays.com/.*$      [NC]
+RewriteCond %{HTTP_REFERER} !^https://tngholidays.com$      [NC]
+RewriteCond %{HTTP_REFERER} !^https://www.tngholidays.com/.*$      [NC]
+RewriteCond %{HTTP_REFERER} !^https://www.tngholidays.com$      [NC]
+RewriteRule .*\.(jpg|jpeg|gif|png|bmp)$ https://www.tngholidays.com [R,NC]
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-SSL} !on
+RewriteCond %{HTTP_HOST} ^tngholidays\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.tngholidays\.com$
+RewriteRule ^(.*)$ "https\:\/\/www\.tngholidays\.com\/$1" [R=301,L]
+RewriteCond %{HTTP_HOST} ^tngholidays\.com$ [OR]
+RewriteCond %{HTTP_HOST} ^www\.tngholidays\.com$
+RewriteRule ^www\.tngholidays\.com$ "https\:\/\/www\.tngholidays\.com\/" [R=301,L]

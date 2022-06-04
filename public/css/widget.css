@@ -1,0 +1,152 @@
+  #tng-widget {
+    position: fixed;
+    top: 35%;
+    right: -95px;
+    z-index: 9999;
+    -webkit-transform: rotate( 
+-90deg
+ );
+    -moz-transform: rotate(-90deg);
+    -ms-transform: rotate(-90deg);
+    -o-transform: rotate(-90deg);
+    transform: rotate( 
+-90deg
+ );
+}
+.hg_widget_button {
+    color: #fff;
+    background: #00aeef;
+    padding: 17px;
+    border-radius: 15px;
+    font-weight: bold;
+    cursor: pointer;
+}
+  @media (min-width: 768px) {
+    .customModal-dialog {
+    width: 600px;
+    margin: 30px auto;
+}
+  }
+
+    .customModal-open .customModal {
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.customModal-open {
+    overflow: hidden;
+}
+.customFade.in {
+    opacity: 1;
+}
+.customModal {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 9999999;
+    display: block;
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+    outline: 0;
+}
+.customFade {
+    opacity: 0;
+    -webkit-transition: opacity .15s linear;
+    -o-transition: opacity .15s linear;
+    transition: opacity .15s linear;
+}
+.customModal.in .customModal-dialog {
+    -webkit-transform: translate(0,0);
+    -ms-transform: translate(0,0);
+    -o-transform: translate(0,0);
+    transform: translate(0,0);
+}
+.hg_widget_button:hover {
+    color: #fff;
+}
+
+.customModal.customFade .customModal-dialog {
+    -webkit-transform: translate(0,-25%);
+    -ms-transform: translate(0,-25%);
+    -o-transform: translate(0,-25%);
+    transform: translate(0,-25%);
+    -webkit-transition: -webkit-transform .3s ease-out;
+    -o-transition: -o-transform .3s ease-out;
+    transition: -webkit-transform .3s ease-out;
+    transition: transform .3s ease-out;
+    transition: transform .3s ease-out,-webkit-transform .3s ease-out,-o-transform .3s ease-out;
+}
+
+.customFade .customModal-dialog {
+    position: relative;
+    width: 800px;
+    margin: 176px auto;
+    height: 100%;
+}
+.customModal-content {
+    position: relative;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #999;
+    border: 1px solid rgba(0,0,0,.2);
+    border-radius: 6px;
+    -webkit-box-shadow: 0 3px 9px rgb(0 0 0 / 50%);
+    box-shadow: 0 3px 9px rgb(0 0 0 / 50%);
+    outline: 0;
+}
+.customModal-header {
+    padding: 15px;
+    border-bottom: 1px solid #e5e5e5;
+}
+.customModal-header .close {
+    margin-top: -8px;
+}
+
+button.close {
+    padding: 0;
+    cursor: pointer;
+    background: 0 0;
+    border: 0;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+.close {
+    float: right;
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    filter: alpha(opacity=20);
+    opacity: .2;
+}
+.customModal-title {
+    margin: 0;
+    line-height: 1.42857143;
+}
+.customModal-body {
+    position: relative;
+}
+.customModal-backdrop {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 999999;
+    background-color: #000;
+}
+.customModal-backdrop.in {
+    filter: alpha(opacity=50);
+    opacity: .5;
+}
+@media only screen and (max-width: 660px) {
+.customFade .customModal-dialog {
+    position: relative;
+    width: 100%;
+    margin: 176px auto;
+    height: 100%;
+}
+}

@@ -1,0 +1,9 @@
+[06-Oct-2021 16:40:52 UTC] PHP Parse error:  syntax error, unexpected 'return' (T_RETURN) in /home/tngholid/public_html/app/Helpers/AppHelper.php on line 1434
+[06-Oct-2021 16:40:55 UTC] PHP Parse error:  syntax error, unexpected 'return' (T_RETURN) in /home/tngholid/public_html/app/Helpers/AppHelper.php on line 1434
+[06-Oct-2021 16:40:58 UTC] PHP Parse error:  syntax error, unexpected 'return' (T_RETURN) in /home/tngholid/public_html/app/Helpers/AppHelper.php on line 1434
+[06-Oct-2021 16:41:01 UTC] PHP Parse error:  syntax error, unexpected 'return' (T_RETURN) in /home/tngholid/public_html/app/Helpers/AppHelper.php on line 1434
+[06-Oct-2021 16:41:02 UTC] PHP Parse error:  syntax error, unexpected 'return' (T_RETURN) in /home/tngholid/public_html/app/Helpers/AppHelper.php on line 1434
+[06-Oct-2021 16:41:06 UTC] PHP Parse error:  syntax error, unexpected 'return' (T_RETURN) in /home/tngholid/public_html/app/Helpers/AppHelper.php on line 1434
+[06-Oct-2021 16:41:11 UTC] PHP Parse error:  syntax error, unexpected 'return' (T_RETURN) in /home/tngholid/public_html/app/Helpers/AppHelper.php on line 1434
+[10-Oct-2021 13:19:51 Asia/Kolkata] PHP Fatal error:  Cannot redeclare Modules\Lead\Admin\LeadController::viewleadInfo() in /home/tngholid/public_html/modules/Lead/Admin/LeadController.php on line 838
+[10-Oct-2021 13:19:52 Asia/Kolkata] PHP Fatal error:  Cannot redeclare Modules\Lead\Admin\LeadController::viewleadInfo() in /home/tngholid/public_html/modules/Lead/Admin/LeadController.php on line 838
