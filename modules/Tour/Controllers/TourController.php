@@ -114,107 +114,104 @@
             $dayCount = 1;
             $k = 0;
             $bookingDate = $getBookingData['start_date'];
-            if(isset($getBookingData['default_hotels'])){
-                foreach ($getBookingData['default_hotels'] as $key => $hotel) {
-                    $dateDay = "+$k day";
-                    $default_date = date('d/m/Y', strtotime($getBookingData['start_date'] . $dateDay));
-    
-                    $days = $hotel['days'] * 2;
-                    $noDays = $hotel['days'] * 2;
-                    $dayPlus = "+$noDays day";
-                    $hotel['check_in'] = date('d M, Y', strtotime($bookingDate));
-                    $hotel['check_out'] = date('d M, Y', strtotime($bookingDate . $dayPlus));
-          
-    
-                    $date = date('Y-m-d', strtotime($bookingDate . $dayPlus));
-                    $bookingDate = date('Y-m-d', strtotime($date));
-    
-                    $getBookingData['default_hotels'][$key]['check_in'] = $hotel['check_in'];
-                    $getBookingData['default_hotels'][$key]['check_out'] = $hotel['check_out'];
-    
-                    $getBookingData['by_default_hotels'][$key]['check_out'] = $hotel['check_out'];
-                    $getBookingData['by_default_hotels'][$key]['check_out'] = $hotel['check_out'];
-                    // if (count($getBookingData['default_hotels']) == ($key+1)) {
-                    //     $days += 1;
-                    // }
-                    
-                    $days = (int) $days;
-                    $array['index'] = $key;
-                    $j = 1;
-                    // dd($row->itinerary);
-                    $row->itinerary = array_combine(range(0, count($row->itinerary)-1), array_values($row->itinerary));
- 
-                    // if($key == 1){
-                    //     dd($hotel['days']);
-                    // }
-                    
-    
-                    for ($i=0; $i < $days; $i++) {
-                        $dayPlus = "+$k day";
-                        $default_date = date('d/m/Y', strtotime($getBookingData['start_date'] . $dayPlus));
-                        $array = array(
-                            'transfer' => array(),
-                            'morning_activity' => array(),
-                            'hotel' => null,
-                            'activity' => array(),
-                            'evening_activity' => array(),
-                            'day' => 'Day '.$dayCount,
-                            'location' => $hotel['location_name'],
-                            'location_id' => $hotel['location_id'],
-                            'date' => $default_date,
-                            'index' => $key,
-                            'itinerary' => $row->itinerary[$k]
-                        );
-    
-                        if (isset($row->itinerary[$k]['transfer'])) {
-                            $terms = getTermOnly($row->itinerary[$k]['transfer'])->toArray();
-    
-                            foreach ($terms as $key => $term) {
-                                // dd($term);
-                                $terms[$key]['img_url'] = url('/uploads').'/'.getImageUrlById($term['image_id']);
-                                $terms[$key]['inclusions_name'] = (isset($term['inclusions']) && !empty($term['inclusions'])) ? getInclusionsArray($term['inclusions']) : null;
-                            }
-                            $array['transfer'] = $terms;
-                        }
-                        if ($j == 1) {
-                            $array['hotel'] = $hotel;
-                        }
+            foreach ($getBookingData['default_hotels'] as $key => $hotel) {
+                $dateDay = "+$k day";
+                $default_date = date('d/m/Y', strtotime($getBookingData['start_date'] . $dateDay));
+
+                $days = $hotel['days'] * 2;
+                $noDays = $hotel['days'] * 2;
+                $dayPlus = "+$noDays day";
+                $hotel['check_in'] = date('d M, Y', strtotime($bookingDate));
+                $hotel['check_out'] = date('d M, Y', strtotime($bookingDate . $dayPlus));
+
+                $date = date('Y-m-d', strtotime($bookingDate . $dayPlus));
+                $bookingDate = date('Y-m-d', strtotime($date));
+
+                $getBookingData['default_hotels'][$key]['check_in'] = $hotel['check_in'];
+                $getBookingData['default_hotels'][$key]['check_out'] = $hotel['check_out'];
+
+                $getBookingData['by_default_hotels'][$key]['check_out'] = $hotel['check_out'];
+                $getBookingData['by_default_hotels'][$key]['check_out'] = $hotel['check_out'];
+                if (count($getBookingData['default_hotels']) == ($key+1)) {
+                    $days += 1;
+                }
+                
+                $days = (int) $days;
+                $array['index'] = $key;
+                $j = 1;
+                // dd($row->itinerary);
+                $row->itinerary = array_combine(range(0, count($row->itinerary)-1), array_values($row->itinerary));
+           
+
+
+                for ($i=0; $i < $days; $i++) {
+                    $dayPlus = "+$k day";
+                    $default_date = date('d/m/Y', strtotime($getBookingData['start_date'] . $dayPlus));
+                    $array = array(
+                        'transfer' => array(),
+                        'morning_activity' => array(),
+                        'hotel' => null,
+                        'activity' => array(),
+                        'evening_activity' => array(),
+                        'meals' => array(),
+                        'day' => 'Day '.$dayCount,
+                        'location' => $hotel['location_name'],
+                        'location_id' => $hotel['location_id'],
+                        'date' => $default_date,
+                        'index' => $key,
+                        'itinerary' => isset($row->itinerary[$k]) ? $row->itinerary[$k] : null,
+                    );
+
+                    if (isset($row->itinerary[$k]['transfer'])) {
                         
-                        
-                        if (isset($row->itinerary[$k]['term']) && !empty($row->itinerary[$k]['term'])) {
-                            $terms = getTermOnly($row->itinerary[$k]['term'])->toArray();
-                            $morningArray = array();
-                            $dayArray = array();
-                            $eveningArray = array();
-                            foreach ($terms as $key => $term) {
-                                $term['img_url'] = url('/uploads').'/'.getImageUrlById($term['image_id']);
-                                $term['inclusions_name'] = (isset($term['inclusions']) && !empty($term['inclusions'])) ? getInclusionsArray($term['inclusions']) : null;
-    
-                                if ($term['time_zone'] == 1) {
-                                    $morningArray[] = $term;
-                                }elseif ($term['time_zone'] == 3) {
-                                    $eveningArray[] = $term;
-                                }else{
-                                    $dayArray[] = $term;
-                                }
-                            }
-                            $array['morning_activity'] = $morningArray;
-                            $array['activity'] = $dayArray;
-                            $array['evening_activity'] = $eveningArray;
+                        $terms = getTermOnly($row->itinerary[$k]['transfer'])->toArray();
+                        foreach ($terms as $key => $term) {
+                            // dd($term);
+                            $term[$key]['img_url'] = url('/uploads').'/'.getImageUrlById($term['image_id']);
+                            $term[$key]['inclusions_name'] = !empty($term['inclusions']) ? getInclusionsArray($term['inclusions']) : null;
                         }
-                        
-                        $itineraries[] = $array;
-                        $j++;
-                        $dayCount++;
-                        $k++;
+                        $array['transfer'] = $terms;
                     }
+                    if ($j == 1) {
+                        $array['hotel'] = $hotel;
+                    }
+                    
+                    
+                    if (isset($row->itinerary[$k]['term']) && !empty($row->itinerary[$k]['term'])) {
+                        $terms = getTermOnly($row->itinerary[$k]['term'])->toArray();
+                        $morningArray = array();
+                        $dayArray = array();
+                        $eveningArray = array();
+                        foreach ($terms as $key => $term) {
+                            // dd($term);
+                            $term['img_url'] = url('/uploads').'/'.getImageUrlById($term['image_id']);
+                            $term['inclusions_name'] = getInclusionsArray($term['inclusions']);
+
+                            if ($term['time_zone'] == 1) {
+                                $morningArray[] = $term;
+                            }elseif ($term['time_zone'] == 3) {
+                                $eveningArray[] = $term;
+                            }else{
+                                $dayArray[] = $term;
+                            }
+                        }
+                        $array['morning_activity'] = $morningArray;
+                        $array['activity'] = $dayArray;
+                        $array['evening_activity'] = $eveningArray;
+                    }
+                    
+                    $itineraries[] = $array;
+                    $j++;
+                    $dayCount++;
+                    $k++;
                 }
             }
-            
-            // dd($itineraries);
             $getBookingData['itineraries'] = $itineraries;
+            $getBookingData['booking_type'] = $request->type;
+            $getBookingData['enquiry_id'] = $request->enquiry;
 
             $getBookingData['hotelrooms'] = array(array('adults'=>2,'children'=>0,'room'=>1,'price'=>1));
+            $getBookingData['is_user_verified'] = null;
             $data = [
                 'row' => $row,
                 'translation' => $translation,
@@ -274,14 +271,14 @@
                         $q->orWhere('time_zone', 3);
                     }
                 });
-                if (count($data['all_ids']) > 0) {
-                   $query->whereNotIn('id', $data['all_ids']);
+                if (count($request->all_ids) > 0) {
+                   $query->whereNotIn('id', $request->all_ids);
                 }
                 $termss = $query->get();
             }else{
                 $query = Terms::whereNull('hide_in_single')->where('attr_id', $data['attribute']);
-                if (count($data['all_ids']) > 0) {
-                   $query->whereNotIn('id', $data['all_ids']);
+                if (count($request->all_ids) > 0) {
+                   $query->whereNotIn('id', $request->all_ids);
                 }
                 if ($evening > 0) {
                     $query->where('time_zone', '!=', 3);

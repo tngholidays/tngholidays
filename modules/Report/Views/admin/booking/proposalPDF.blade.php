@@ -88,6 +88,48 @@ footer {
           
       }
       $flightPrice = ($flightPrice*$persns);
+
+      $hotel_rooms = json_decode($booking->getMeta('hotel_rooms'), true); $persons = 0;
+        $nurooms = 0;
+        $nuadult = 0;
+        $nuchild = 0;
+        if($hotel_rooms > 0){
+            foreach($hotel_rooms as $indx => $room){
+                $nurooms++;
+                $nuadult += $room['adults'];
+                $nuchild += $room['children'];
+                $persons += ($room['adults']+$room['children']);
+            }
+        }
+        $tour_activities = $booking->allActivities();
+        $totalTransfer = 0;
+        $totalHotel = 0;
+        $totalActivity = 0;
+           $tour_activities = $booking->activities();
+
+           foreach ($tour_activities as $key => $summary) {
+            if (!empty($summary['transfer']) && count($summary['transfer']) > 0) {
+                 $totalTransfer += count($summary['transfer']);
+
+            }
+            if (!empty($summary['morning_activity']) && count($summary['morning_activity']) > 0) {
+                $totalActivity += count($summary['morning_activity']);
+
+            }
+            if (!empty($summary['hotel']) && count($summary['hotel']) > 0) {
+                 $totalHotel += 1;
+
+            }
+            if (!empty($summary['activity']) && count($summary['activity']) > 0) {
+                $totalActivity += count($summary['activity']);
+
+            }
+
+            if (!empty($summary['evening_activity']) && count($summary['evening_activity']) > 0) {
+                $totalActivity += count($summary['evening_activity']);
+
+            }
+           }
      ?>
       <img style="width:100%; height: 700px;object-fit: cover;" src="{{$mainImg}}" />
     </td>
@@ -103,18 +145,11 @@ footer {
             <td style="color: #fff; line-height: 22px; font-size: 15px;padding:10px 0px 10px 20px;">
               {{getTermById($row->duration)->name}} <br>INR {{$row->total_tour_price}} Tour Budget/Cost
               @if($flightss) <br>INR {{$flightPrice}}/-* Tour Flight Charge (T&C Apply) @endif
+
               
               <br> <span style="font-size:12px;">(Extra 5% GST)</span> <br>
-              @if(!empty($row->person_types))
-              <?php $flag = false; ?>
-                  @foreach($row->person_types as $key=>$person_type)
-                  @if($person_type['number'] > 0)
-                  @if($flag == true) and @endif
-                  {{$person_type['number']}} {{$person_type['name']}}
-                  <?php $flag = true; ?>
-                  @endif
-                  @endforeach
-              @endif<br>
+              {{$nuadult}} Adult and {{$nuchild}} Child 
+              <br>
              <b>Departure dates:</b> {{ date('d M, Y', strtotime($row->start_date))}}
             </td>
               <td style="font-size: 15px;">
@@ -188,8 +223,6 @@ footer {
 
  <div class="pageBreak DaywiseItinerary">
   <table cellpadding="0" cellspacing="0" style="width:100%; page-break-before: always;">
-
-
     <tbody>
     <tr>
       <td>
@@ -199,79 +232,281 @@ footer {
           <td style="background: #81d5f3; text-align: right; padding: 15px 20px 8px 20px;"><img width="140" src="{{ public_path('uploads/logo.png') }}" /></td>
           </tr>
           <tr>
-	          <td style="background: #81d5f3; color:#fff; font-size:24px; padding: 0px 20px 15px 20px; font-weight: 700;">{{$tour->title}} <br> Daywise Itinerary</td>
+	          <td style="background: #81d5f3; color:#fff; font-size:24px; padding: 0px 20px 15px 20px; font-weight: 700;">Daywise Itinerary</td>
           </tr>
         </tbody>
       </table>
       </td>
     </tr>
-
-    @if(!empty($row->itinerary))
-    @foreach($row->itinerary as $i_key=>$itinerary)
-    <?php
-    $start_date = str_replace("/", "-", $itinerary['date']);
-    ?>
     <tr>
       <td>
-        <table style="width:100%; table-layout: fixed;">
-          <tbody>
-            <tr>
-              <td>
-                <table cellpadding="0" cellspacing="0" style="width:100%;">
-                  <tbody>
-                    <tr>
-                      <td style=" color: #07a7e5; font-size: 16px; font-weight: 700; padding: 10px 20px 10px;">
-					  <span style="border-bottom: 2px dashed #07A7E4;padding-bottom: 7px;">DAY {{$i_key+1}} | {{ date('d M, Y', strtotime($start_date))}}</span>
-					  </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 20px 20px 15px;">
-                <table cellpadding="0" cellspacing="0" style="width:100%;">
-                  <tbody>
-                    <tr>
-                <td style="width: 40px;"><img style="width: 25px;" src="{{ public_path('uploads/pro_image_icon.png') }}" /></td>
-				<td style=" color: #cd853f; font-weight: 700; font-size:15px;">
-				{{$itinerary['desc']}}
-				</td>
-                        </tr>
-                  </tbody>
-                </table>
-              </td>
-            </tr>
-            <tr>
-              <td>
-                <table cellpadding="0" cellspacing="0" style="width:100%;">
-          <tbody>
-              <tr>
-                <td style="padding: 0px 0px 10px 50px; text-align:right; vertical-align: top; width:150px;">
-                  <?php
-                   $itineraryIMG = "";
-                  if (!empty($itinerary['image_id'])) {
-                    $itineraryIMG = public_path('uploads/').getImageUrlById($itinerary['image_id']);
-                   }
-                  ?>
-				<img style="height: 90px;width: 150px;object-fit: cover;" src="{{$itineraryIMG}}" />
-				</td>
-				<td style="font-weight:400; font-size: 14px; padding: 0px 20px 0px; vertical-align: top;color: #888c80;text-align: justify;">{!! $itinerary['content'] !!}.</td>
-              </tr>
+        <table cellpadding="0" cellspacing="0" style="width: 100%; padding: 15px 0px 0px; width:100%; table-layout: fixed;">
+            <tbody>
+                <tr>
+                    <td style="text-align: right; width: 195px;">
+                        <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                            <tbody>
+                                <tr>
+                                    <td colspan="10" style="text-align:right; padding: 0px 5px 10px 0px;">Highlights</td>
+                                </tr>
+                                <tr>
+                                    <td style="width:70px; border: 1px solid #000; padding: 6px; text-align: center; background: #fff; height: 60px; border-radius: 10px;">
+                                        <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                                            <tbody>
+                                                <tr>
+                                                    <td style="text-align: center;">
+                                                        <i style="background: #ececec; width: 30px; height: 30px; margin: auto; border-radius: 100%; text-align: center; display: inline-block; vertical-align: middle;">
+                                                            <img style="width: 49%;  margin-top: 7px;" src="{{ public_path('uploads/home-icon.png') }}" />
+                                                        </i>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="font-size: 13px; text-align: center;">{{$totalHotel}} Hotel</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td style="width: 10px;">&nbsp;</td>
+                                    <td style="width:70px; border: 1px solid #000; padding: 6px; text-align: center; background: #fff; height: 60px; border-radius: 10px;">
+                                        <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <i style="background: #ececec; width: 30px; height: 30px; margin: auto; border-radius: 100%; text-align: center; display: inline-block; vertical-align: middle;">
+                                                            <img style="width: 49%;  margin-top: 7px;" src="{{ public_path('uploads/book-icon.png') }}" />
+                                                        </i>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="font-size: 13px; text-align: center;">{{$totalActivity}} Activities</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td style="width: 10px;">&nbsp;</td>
+                                    <td style="width:70px; border: 1px solid #000; padding: 6px; text-align: center; background: #fff; height: 60px; border-radius: 10px;">
+                                        <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <i style="background: #ececec; width: 30px; height: 30px; margin: auto; border-radius: 100%; text-align: center; display: inline-block; vertical-align: middle;">
+                                                            <img style="width: 49%;  margin-top: 7px;" src="{{ public_path('uploads/car.png') }}" />
+                                                        </i>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="font-size: 13px; text-align: center;">{{$totalTransfer}} Transfers</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td style="width: 10px;">&nbsp;</td>
+                                    <td style="width:70px; border: 1px solid #000; padding: 6px; text-align: center; background: #fff; height: 60px; border-radius: 10px;">
+                                        <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <i style="background: #ececec; width: 30px; height: 30px; margin: auto; border-radius:100%; text-align: center; display: inline-block; vertical-align: middle;">
+                                                            <img style="width: 49%;  margin-top: 7px;" src="{{ public_path('uploads/people.jpg') }}" />
+                                                        </i>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="font-size: 13px; text-align: center;">{{$persons}} Pax</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td style="width: 10px;">&nbsp;</td>
+                                    <?php /*
+                                    <td style="width:70px; border: 1px solid #000; padding: 6px; text-align: center; background: #fff; height:60px; border-radius: 10px;">
+                                        <table cellpadding="0" cellspacing="0" style="width: 100%;">
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <i style="background: #ececec; width: 30px; height: 30px; margin: auto; border-radius: 100%; text-align: center; display: inline-block; vertical-align: middle;">
+                                                            <img style="width: 49%; margin-top: 7px;" src="{{ public_path('uploads/food-icon.png') }}" />
+                                                        </i>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="font-size: 13px; text-align: center;">0 Meal</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td style="width:5px;">&nbsp;</td> */ ?>
 
-          </tbody>
-        </table>
-              </td>
-            </tr>
-          </tbody>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr><td colspan="4" style="padding-top: 8px;"></td></tr>
+
+                @php $extra_price = $booking->getJsonMeta('extra_price'); @endphp
+                @if(!empty($extra_price))
+                <tr>
+                    <td colspan="4">
+                        <table cellpadding="0" cellspacing="0" style="width: 100%; table-layout: fixed;">
+                            <tr>
+                                <td colspan="3" style="border: 1px solid #aedad5;text-align: left; background: #aedad5; font-size: 19px; padding: 8px 10px;"><strong>Extra Services (inluded in package) </strong>
+                                </td>
+
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="border: 1px solid #ccc;  font-size: 20px; padding: 8px 8px 8px;">
+                                    @foreach($extra_price as $type)
+                                         <span style="font-size: 25px;"> &#8226;</span> {{$type['name']}},
+                                    @endforeach
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr><td colspan="4" style="padding-top: 8px;"></td></tr>
+                @endif
+
+                @if(!empty($tour_activities))
+                @foreach($tour_activities as $key=>$summary)
+                <?php $summary['rowspan'] +=1 ?>
+                <tr>
+                    <td colspan="4">
+                        <table cellpadding="0" cellspacing="0" style="width: 100%; table-layout: fixed;">
+                    <tbody>
+
+                @if(count($summary['hotel']) > 0)
+                <tr>
+
+                    <td style="text-align: left; background: #aedad5; font-size: 19px; padding: 8px 10px;">
+                        <img src="{{ public_path('uploads/location-icon.png') }}" style="width: 22px; float: left; margin: -4px 7px 0px 0px;" /><strong>{{$summary['location']}} </strong>
+                    </td>
+                    <td colspan="3" style="text-align: left; background: #aedad5; font-size: 19px; padding: 0px 0px;"></td>
+
+                </tr>
+                @endif
+                
+                <tr class="NewRow">
+                    <td rowspan="{{$summary['rowspan']}}"  style="text-align: left;font-size: 14px;border: 1px solid #ccc;  padding: 8px 10px 0px; background: #fff; width: 144px;vertical-align: top;"><strong>{{$summary['date']}}, {{$summary['day']}}</strong></td>
+                    <td colspan="3" style="float: left; margin: -10px;border-left: 1px solid #ccc;border-right: 1px solid #ccc;"></td>
+                </tr>
+                @if(!empty($summary['breackfast']))
+                <tr>
+                    <td colspan="3"style="border: 1px solid #ccc;border-top:0px;  font-size: 14px; padding: 0px 8px 8px; border-left: 0px;"><img src="{{ public_path('uploads/food-icon.png') }}" style="width: 22px;margin-right: 5px;" />{{$summary['breackfast'] ?? ""}}</td>
+                </tr>
+                @endif
+                @if(count($summary['transfer']) > 0)
+                    @foreach($summary['transfer'] as $key=>$transfer)
+                    <tr>
+
+                        <td colspan="3" style="border: 1px solid #ccc;border-top:0px; font-size: 14px; padding: 8px 8px 8px; border-left: 0px;"><img src="{{ public_path('uploads/book-icon.png') }}" style="width: 22px; margin-right: 5px;" />{{$transfer['name'] ?? ""}}</td>
+                    </tr>
+                    @endforeach
+                @endif
+
+
+                @if(count($summary['hotel']) > 0)
+                <tr>
+                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px;  font-size: 14px; padding: 8px 8px 8px; border-left: 0px;"><img src="{{ public_path('uploads/home-icon.png') }}" style="width: 22px; margin-right: 5px;" />Check in to {{$summary['hotel']['hotel_name'] ?? ""}}
+                    <div style="padding-left:27px;font-size: 12px;">
+                            <span>Room: {{$summary['hotel']['room_name'] ?? ""}}</span>
+                        </div>
+                    </td>
+                </tr>
+                @endif
+
+                @if(count($summary['morning_activity']) > 0)
+                @foreach($summary['morning_activity'] as $key => $activity)
+                <tr>
+
+                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px; font-size: 14px; padding: 8px 8px 8px; border-left: 0px;">
+                        <img src="{{ public_path('uploads/book-icon.png') }}" style="width: 22px; margin-right: 5px;" />
+                        {{$activity['name'] ?? ""}}
+                    @if(!empty($activity['inclusions_name']) || !empty($activity['exclude']) || !empty($activity['duration']))
+                    <div style="padding-left:27px;font-size: 12px;">
+                        @if(!empty($activity['duration']))
+                        <span>Duration: {{$activity['duration'] ?? ""}}</span>
+                        <br>
+                        @endif
+                        @if(!empty($activity['inclusions_name']))
+                        <span>Inclusions: {{$activity['inclusions_name'] ?? ""}}</span>
+                        <br>
+                        @endif
+                        @if(!empty($activity['exclude']))
+                        <span>Exclusions: {{$activity['exclude'] ?? ""}}</span>
+                        @endif
+                    </div>
+                    @endif
+                    
+                    </td>
+                </tr>
+                @endforeach
+                @endif
+
+                @if(count($summary['activity']) > 0)
+                @foreach($summary['activity'] as $key=>$activity)
+                <tr>
+
+                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px;  font-size: 14px; padding: 8px 8px 8px; border-left: 0px;"><img src="{{ public_path('uploads/book-icon.png') }}" style="width: 22px; margin-right:5px;" />{{$activity['name'] ?? ""}}
+                    @if(!empty($activity['inclusions_name']) || !empty($activity['exclude']) || !empty($activity['duration']))
+                    <div style="padding-left:27px;font-size: 12px;">
+                        @if(!empty($activity['duration']))
+                        <span>Duration: {{$activity['duration'] ?? ""}}Hrs. </span>
+                        <br>
+                        @endif
+                        @if(!empty($activity['inclusions_name']))
+                        <span>Inclusions: {{$activity['inclusions_name'] ?? ""}}</span>
+                        <br>
+                        @endif
+                        @if(!empty($activity['exclude']))
+                        <span>Exclusions: {{$activity['exclude'] ?? ""}}</span>
+                        @endif
+                    </div>
+                    @endif
+                    
+                    </td>
+                </tr>
+                @endforeach
+                @endif
+
+                @if(count($summary['evening_activity']) > 0)
+                @foreach($summary['evening_activity'] as $key=>$activity)
+                <tr>
+
+                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px;  font-size: 14px; padding: 8px 8px 8px; border-left: 0px;"><img src="{{ public_path('uploads/book-icon.png') }}" style="width: 22px; margin-right: 5px;" />{{$activity['name'] ?? ""}}
+                    @if(!empty($activity['inclusions_name']) || !empty($activity['exclude']) || !empty($activity['duration']))
+                    <div style="padding-left:27px;font-size: 12px;">
+                        @if(!empty($activity['duration']))
+                        <span>Duration: {{$activity['duration'] ?? ""}}Hrs. </span>
+                        <br>
+                        @endif
+                        @if(!empty($activity['inclusions_name']))
+                        <span>Inclusions: {{$activity['inclusions_name'] ?? ""}} </span>
+                        <br>
+                        @endif
+                        @if(!empty($activity['exclude']))
+                        <span>Exclusions: {{$activity['exclude'] ?? ""}}</span>
+                        @endif
+                    </div>
+                    @endif
+                    </td>
+                </tr>
+                @endforeach
+                @endif
+                    </tbody>
+                </table>
+                    </td>
+                </tr>
+                @endforeach
+                @endif
+            </tbody>
         </table>
       </td>
     </tr>
-    @endforeach
-    @endif
   </tbody>
   </table>
  </div>
+<?php /*
  <div class="pageBreak">
     <table cellpadding="0" cellspacing="0" style="width: 100%;page-break-before: always;">
         <thead>
@@ -331,6 +566,8 @@ footer {
         </tbody>
     </table>
 </div>
+
+*/ ?>
 <?php /*
  <div class="pageBreak">
   <table cellpadding="0" cellspacing="0" style="width: 100%;table-layout: auto;page-break-before: always;">
@@ -398,12 +635,10 @@ footer {
 
   </table>
  </div> */ ?>
-
-
  <div class="pageBreak">
-   @if(!empty($row->default_hotels))
+   @if(!empty(json_decode($booking->default_hotels, true)))
    <?php $bookingDate = $row->start_date;?>
-   @foreach ($row->default_hotels as $indx => $hotel)
+   @foreach (json_decode($booking->default_hotels, true) as $indx => $hotel)
    <?php
      $hotelDDetail = getHotelById($hotel['hotel']);
      $noDays = $hotel['days'] * 2;
@@ -624,33 +859,6 @@ footer {
                                 <?php $flightPricePP += $flight['price']; ?>
                                 <th style="text-align: left; background: #f7f7f7; border-bottom: 3px solid #f2f2f2; padding: 2px 0px 2px;" colspan="6"><span style="font-size:12px; color:#07a7e3;"><b>Per Person Flight Charges {{$flight['price']}}/-</b></span></th>
                             </tr>
-                            <?php /*
-                            <tr>
-                                <th style="text-align: left; padding: 20px 0px 5px 0px;">Seat type</th>
-                                <th style="text-align: left; padding: 20px 0px 5px 0px;">Baggage</th>
-                                <th style="text-align: left; padding: 20px 0px 5px 0px;">Check-in</th>
-                                <th style="text-align: left; padding: 20px 0px 5px 0px;">Cabin</th>
-                                <th style="text-align: left; padding: 20px 0px 5px 0px;">Price</th>
-                                <th style="text-align: left; padding: 20px 0px 5px 0px;">Number</th>
-                            </tr>
-                            <tr>
-                                <td style="padding: 0px 0px 20px 0px;">Economy </td>
-                                <td style="padding: 0px 0px 20px 0px;">Adult</td>
-                                <td style="padding: 0px 0px 20px 0px;">1Kgs</td>
-                                <td style="padding: 0px 0px 20px 0px;">1Kgs</td>
-                                <td style="padding: 0px 0px 20px 0px;">$2222</td>
-                                <td style="padding: 0px 0px 20px 0px;">
-                                    <table cellpadding="0" cellspacing="0" style="width: 100px;">
-                                        <tbody>
-                                            <tr>
-                                                <td><img width="10" src="left-icon.png" /></td>
-                                                <td>0</td>
-                                                <td><img width="10" src="right-icon.png" /></td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr> */ ?>
                         </tbody>
                     </table>
                 </td>
@@ -673,6 +881,7 @@ footer {
     </table>
 </div>
  @endif
+ <?php /*
  <?php
  $extra_prices = [];
  if (!empty($row->extra_price) and count($row->extra_price) > 0) {
@@ -771,14 +980,17 @@ footer {
    </table>
   </div>
 	@endif
+
+  */ ?>
   <div class="pageBreak">
     <table cellpadding="0" cellspacing="0" style="width: 100%;page-break-before: always;">
       <tbody>
         <tr>
-          <td style="background: #81d5f3; color:#fff; font-size:30px; padding: 25px 20px 30px 20px; font-weight: 700;">Inclusion & Exclusion / Cost, Terms & <br>
+          <td style="background: #81d5f3; color:#fff; font-size:30px; padding: 25px 20px 30px 20px; font-weight: 700;">Cost, Terms & <br>
     Condition / Cancellation
     </td>
         </tr>
+        <?php /*
         <tr>
           <td>
             <table cellpadding="0" cellspacing="0" style="width: 100%;">
@@ -809,6 +1021,7 @@ footer {
             </table>
           </td>
         </tr>
+        */?>
         <tr>
           <td style="vertical-align: top; padding:10px 20px 10px;">
             <h2 style="color:#b78829; font-size: 15px;padding: 20px 0px 0px; margin: 0px;">Terms & Conditions:</h2>

@@ -12,17 +12,23 @@ class TermsTranslation extends BaseModel
         'price',
         'type',
         'transfer_price',
+        'transfer_prices',
         'inclusions',
         'duration',
         'exclude',
         'direction',
         'time_zone',
         'emails',
-        'desc',
+        'must',
         'hide_in_single',
-        'must'
+        'desc',
     ];
     protected $cleanFields = [
         'content'
+    ];
+
+     protected $casts = [
+        'transfer_prices' => 'array'
+
     ];
 }

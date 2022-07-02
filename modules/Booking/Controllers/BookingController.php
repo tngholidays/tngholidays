@@ -370,6 +370,7 @@ class BookingController extends \App\Http\Controllers\Controller
      */
     public function addToCart(Request $request)
     {
+
         if(!is_enable_guest_checkout() and !Auth::check()){
             return $this->sendError(__("You have to login in to do this"))->setStatusCode(401);
         }
@@ -398,12 +399,53 @@ class BookingController extends \App\Http\Controllers\Controller
         if (!$service->isBookable()) {
             return $this->sendError(__('Service is not bookable'));
         }
-
-        if(Auth::id() == $service->create_user){
-            return $this->sendError(__('You cannot book your own service'));
+        if (!isset($request->enquiry_id) && empty($request->enquiry_id)) {
+            if(Auth::id() == $service->create_user){
+                return $this->sendError(__('You cannot book your own service'));
+            }
         }
+        $bookingReturn = $service->addToCart($request);
 
-        return $service->addToCart($request);
+        if (isset($request->enquiry_id) && !empty($request->enquiry_id)) {
+            $enquiryRow = Enquiry::find($request->enquiry_id);
+            if (!empty($enquiryRow)) {
+                $booking = Booking::where('code',$bookingReturn->original['booking_code'])->first();
+                $bookigAttr = [];
+                if (!empty($booking->tour_attributes)) {
+                    $bookigAttr = json_decode($booking->tour_attributes, true);
+                }
+                $attributes = getTermsById($bookigAttr);
+                $durationName = null;
+                $durationID = null;
+                if (isset($attributes[12])) {
+                    $durationName = $attributes[12]['child'][0]->name;
+                    $durationID = $attributes[12]['child'][0]->id;
+                }
+                $person_types = $booking->getMeta('person_types');
+                $enquery_persons_array = array();
+                $persons = 0;
+                if (!empty($person_types)) {
+                    $person_types = json_decode($person_types, 2);
+                    foreach ($person_types as $key => $person) {
+                       $persons += $person['number'];
+                       $per['name'] = $person['name'];
+                       $per['number'] = $person['number'];
+                       $enquery_persons_array[] = $per;
+                    }
+                }
+                //update data in enquery table
+                $enquiryRow->status = 'processing';
+                $enquiryRow->booking_code = $bookingReturn->original['booking_code'];
+                $enquiryRow->booking_id = $booking->id;
+                $enquiryRow->person_types = $enquery_persons_array;
+                $enquiryRow->approx_date = $booking->start_date;
+                $enquiryRow->save();
+                $booking->enquiry_id = $enquiryRow->id;
+                $booking->save();
+            }
+            
+        }
+        return $bookingReturn;
     }
 
     public function getGateways()

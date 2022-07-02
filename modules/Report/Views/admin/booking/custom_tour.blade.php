@@ -126,6 +126,7 @@
                             </div>
                         </div>
                     </div>
+                    <?php /*
                     @if(!empty($praposal->tour_id))
                         <div class="CustomTour">
                             @include('Tour::admin/tour/tour-content')
@@ -144,7 +145,8 @@
                         <div style="display: none;">
                             @include('Core::admin/seo-meta/seo-meta')
                         </div>
-                    @endif
+                    @endif */
+                     ?>
                     </div>
                     <div class="col-md-3">
                         <div class="panel">
@@ -163,6 +165,7 @@
                                 </div>
                             </div>
                         </div>
+                        <?php /*
                     @if(!empty($praposal->tour_id))
                         @if(is_default_lang())
                         <div class="panel" style="display: none;">
@@ -244,7 +247,7 @@
                                 @include('Tour::admin/tour/ical')
                             </div>
                         @endif
-                        @endif
+                        @endif */ ?>
                     </div>
                 </div>
             </div>

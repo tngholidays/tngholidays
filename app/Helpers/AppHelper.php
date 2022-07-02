@@ -1546,7 +1546,7 @@ function getDirections($id = null){
     return $data;
 }
 function getAttrTypes($id = null){
-    $data = array(1=>'Sightseeing',2=>'Flight',3=>'Meal',4=>'Restaurant',5=>'Transfers',6=>'Duration',7=>'Facilities',8=>'Hotel',9=>'Extra Content');
+    $data = array(1=>'Sightseeing',2=>'Flight',3=>'Meal',4=>'Restaurant',5=>'Transfers',6=>'Duration',7=>'Facilities',8=>'Hotel',9=>'Extra Content',10=>'Transport Vendor');
     if ($id != null) {
        $data = $data[$id];
     }
@@ -1626,4 +1626,80 @@ function WhatsAppCurl($data){
     $response = curl_exec($ch);
     curl_close($ch);
     return $response;
+}
+function calculateDisByPeople($amount, $type, $disVal)
+{
+    $type_total = 0;
+    switch ($type) {
+        case "fixed":
+            $type_total = $disVal;
+            break;
+        case "percent":
+            $type_total = $amount / 100 * $disVal;
+            break;
+    }
+    return $amount-$type_total;
+}
+
+function getTransPriceByAdult($array, $totalGuest)
+{
+
+    $result = 0;
+
+    if (isset($array)) {
+        foreach ($array as $key => $value) {
+            if ($value['from'] <= $totalGuest && $value['to'] >= $totalGuest) {
+                $result = floatval($value['amount']);
+            }
+        }
+    }
+    return $result;
+}
+
+function roomWiseHotelPrice($price, $hotel_rooms)
+{   
+    $totalHotelPrice = 0;
+    if (!empty($hotel_rooms) && count($hotel_rooms)) {
+        foreach ($hotel_rooms as $key => $room) {
+            if ($room['adults'] > 1) {
+                $totalHotelPrice += $price * $room['adults'];
+            }else{
+                $totalHotelPrice += $price * 2;
+            }
+
+            if ($room['adults'] > 1 && $room['children'] == 1) {
+                $totalHotelPrice += $price / 2;
+            }else if($room['children'] > 1){
+                $totalHotelPrice += $price;
+            }
+            
+        }
+    }
+    return $totalHotelPrice;
+}
+
+function calculateTermPriceWithTrans($terms, $total_guests)
+{   
+    $array = ['price' => 0, 'transfer_price'=>0];
+    if (count($terms) > 0) {
+        foreach ($terms as $key => $term) {
+            if (!empty($term['price']) && $term['price'] > 0) {
+                $array['price'] += (float)$term['price']*$total_guests;
+            }
+
+            if (!empty($term['transfer_prices']) && $term['transfer_prices'] > 0) {
+                foreach ($term['transfer_prices'] as $key => $transfer) {
+                    if ($transfer['from'] <= $total_guests and $transfer['to'] >= $total_guests) {
+                        $array['transfer_price'] += $transfer['amount'];
+                    }
+                }
+            }
+        }
+    }
+    
+    return $array;
+}
+function getAttributeByTerm($attr_id){
+    $data = Attributes::select('id','name','type')->where('id',$attr_id)->first();
+    return @$data;
 }

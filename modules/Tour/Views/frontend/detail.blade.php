@@ -514,6 +514,7 @@ img {
 }
 
 </style>
+<?php $bookingType = request()->get('type'); ?>
 @section('content')
     <div class="bravo_detail_tour">
         @include('Tour::frontend.layouts.details.tour-banner')

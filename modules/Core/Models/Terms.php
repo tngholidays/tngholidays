@@ -15,6 +15,7 @@ class Terms extends BaseModel
         'price',
         'type',
         'transfer_price',
+        'transfer_prices',
         'inclusions',
         'duration',
         'exclude',
@@ -31,6 +32,7 @@ class Terms extends BaseModel
     protected $slugFromField = 'name';
      protected $casts = [
         'emails'       => 'array',
+        'transfer_prices'       => 'array',
         'inclusions'   => 'array',
 
     ];

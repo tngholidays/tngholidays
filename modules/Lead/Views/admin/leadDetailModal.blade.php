@@ -83,14 +83,12 @@ table.dataTable thead>tr>th {
                             @if(!empty($rowPraposal))
                             <a class="dropdown-item" href="{{url('admin/module/report/booking/custom_tour/'.$row->id.'/'.$rowPraposal->tour_id)}}">{{__('Custom Tour')}}</a>
                               <a class="dropdown-item" href="{{url('admin/module/report/booking/booking_proposal/'.$row->id.'/'.$rowPraposal->tour_id)}}">{{__('Create Praposal')}}</a>
-        
-                            @else
-                            <a class="dropdown-item" href="{{url('admin/module/report/booking/custom_tour/'.$row->id)}}">{{__('Custom Tour')}}</a>
-                            @endif
-                            @if(!empty($rowPraposal->tour_details))
                               <a class="dropdown-item" href="{{url('admin/module/report/booking/view_proposal/'.$row->id)}}">{{__('View Praposal')}}</a>
                               <a class="dropdown-item" href="{{url('admin/module/report/booking/copyEnquiry/'.$row->id)}}">{{__('Copy Enquiry')}}</a>
                               <a class="dropdown-item" href="{{url('admin/module/report/booking/booking-form/'.$row->id)}}" onclick="return confirm('Are you sure to book?')">{{__('Book')}}</a>
+        
+                            @else
+                            <a class="dropdown-item" href="{{url('admin/module/report/booking/custom_tour/'.$row->id)}}">{{__('Custom Tour')}}</a>
                             @endif
                           @endif
                         </div>

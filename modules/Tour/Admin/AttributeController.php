@@ -137,7 +137,7 @@ class AttributeController extends AdminController
         }
         $listTerms->orderBy('created_at', 'desc');
         $data = [
-            'rows'        => $listTerms->paginate(20),
+            'rows'        => $listTerms->paginate(50),
             'attr'        => $row,
             "row"         => new $this->termsClass(),
             'translation'    => new TermsTranslation(),
@@ -157,6 +157,35 @@ class AttributeController extends AdminController
             ]
         ];
         return view('Tour::admin.terms.index', $data);
+    }
+
+    public function addTerm(Request $request, $attr_id)
+    {
+        $this->checkPermission('tour_manage_attributes');
+        $row = $this->attributesClass::find($attr_id);
+        if (empty($row)) {
+            return redirect()->back()->with('error', __('Term not found!'));
+        }
+        $data = [
+            'attr'        => $row,
+            "row"         => new $this->termsClass(),
+            'translation'    => new TermsTranslation(),
+            'breadcrumbs' => [
+                [
+                    'name' => __('Tour'),
+                    'url'  => 'admin/module/tour'
+                ],
+                [
+                    'name' => __('Attributes'),
+                    'url'  => 'admin/module/tour/attribute'
+                ],
+                [
+                    'name'  => __('Attribute: :name', ['name' => $row->name]),
+                    'class' => 'active'
+                ],
+            ]
+        ];
+        return view('Tour::admin.terms.add', $data);
     }
 
     public function term_edit(Request $request, $id)
@@ -216,6 +245,7 @@ class AttributeController extends AdminController
             $row->emails = array();
         }
         $row->fill($request->input());
+        $row->hide_in_single = $request->hide_in_single;
         $res = $row->saveOriginOrTranslation($request->input('lang'));
         if ($res) {
             return redirect()->back()->with('success', __('Term saved'));

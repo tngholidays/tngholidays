@@ -462,10 +462,17 @@
                         <span class="price">@{{pay_now_price_html}}</span>
                     </li>
                 </ul>
+                <?php 
+                    if ($bookingType == 'add_by_admin') {
+                        $btnText = 'ADD ENQUERY';
+                    }else{
+                        $btnText = 'BOOK NOW';
+                    }
+                ?>
                 <div v-html="html"></div>
                 <div class="submit-group">
                     <a class="btn btn-large" @click="doSubmit($event)" :class="{'disabled':onSubmit,'btn-success':(step == 2),'btn-primary':step == 1}" name="submit">
-                        <span>{{__("BOOK NOW")}}</span>
+                        <span>{{$btnText}}</span>
                         <i v-show="onSubmit" class="fa fa-spinner fa-spin"></i>
                     </a>
                     <div class="alert-text mt10" v-show="message.content" v-html="message.content" :class="{'danger':!message.type,'success':message.type}"></div>

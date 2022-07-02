@@ -65,7 +65,7 @@ class ReCaptchaEngine
         self::maybeInit();
         if (!self::$api_key or !self::$api_secret or !self::$is_enable)
             return false;
-        return true;
+        return false;
     }
 
     public static function maybeInit()

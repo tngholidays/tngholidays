@@ -190,6 +190,24 @@ class Tour extends Bookable
         }
         return url($urlDetail);
     }
+    public function getDetailUrlEditMode($include_param, $code=null)
+    {
+
+        $param['start'] = date('Y-m-d', strtotime($include_param['start_date']));
+        $param['end'] = date('Y-m-d', strtotime($include_param['end_date']));
+        $param['type'] = $include_param['type'] ?? null;
+        $param['enquiry'] = $include_param['enquiry_id'] ?? null;
+        if ($code!=null) {
+            $urlDetail = 'tour/'.$code.'/'.$this->slug;
+        }else{
+            $urlDetail = 'tour/'.$this->slug;
+        }
+        
+        if (!empty($param)) {
+            $urlDetail .= "?" . http_build_query($param);
+        }
+        return url($urlDetail);
+    }
 
     public static function getLinkForPageSearch($locale = false, $param = [])
     {
@@ -282,9 +300,10 @@ class Tour extends Bookable
         $total = 0;
         $total_guests = 0;
         $discount = 0;
-        $base_price = ($this->sale_price and $this->sale_price > 0 and $this->sale_price < $this->price) ? $this->sale_price : $this->price;
+        // $base_price = ($this->sale_price and $this->sale_price > 0 and $this->sale_price < $this->price) ? $this->sale_price : $this->price;
         // for Availability Calendar
-        $base_price = $dataPriceAvailability['base_price'] ?? $base_price;
+        // $base_price = $dataPriceAvailability['base_price'] ?? $base_price;
+        $base_price = $this->before_sale_price;
         $extra_price = [];
         $extra_price_input = $request->input('extra_price');
         $person_types = [];
@@ -293,25 +312,33 @@ class Tour extends Bookable
         $tour_summary = $request->input('tour_summary');
         $applied_coupon = $request->input('applied_coupon');
         $proposal_discount = $request->input('proposal_discount');
-    
+
         $modify_activity = $request->input('modify_activity');
+        $total_transfers_price   =  $modify_activity['total_transfers_price'] ?? 0;
+        $total_sightseeing_price   =  $modify_activity['total_sightseeing_price'] ?? 0;
+    
         $default_hotel_price = $request->input('default_hotel_price');
         $hotel_rooms = $request->input('hotel_rooms');
+        $default_tour_hotel_price = 0;
 
         $discount_by_people = [];
         $meta = $this->meta;
         $attributes = $this->tour_term->pluck('term_id');
+        $attributes = $attributes->toArray();
+        if (isset($modify_activity['remove_activities']) && count($modify_activity['remove_activities']) > 0) {
+            foreach ($modify_activity['remove_activities'] as $key => $removeId) {
+               if (in_array($removeId, $attributes))
+                {
+                    unset($attributes[array_search($removeId,$attributes)]);
+                }
+            }
+        }
         $activity_ids = array();
 
-        $activityPrice = 0;
-        $tranferPrice = 0;
         if (!empty($tour_summary) && count($tour_summary) > 0) {
-             $attributes = $attributes->toArray();
             foreach ($tour_summary as $key => $summary) {
                 if (!empty($summary['morning_activity']) && count($summary['morning_activity']) > 0) {
                     foreach ($summary['morning_activity'] as $key => $value) {
-                        $activityPrice += !empty($value['price']) ? (int)$value['price'] : 0;
-                        $tranferPrice += !empty($value['transfer_price']) ? (int)$value['transfer_price'] : 0;
                         $activity_id = (int)$value['id'];
                         if (!in_array($activity_id, $attributes)){
                             array_push($attributes,$activity_id);
@@ -320,8 +347,6 @@ class Tour extends Bookable
                 }
                 if (!empty($summary['activity']) && count($summary['activity']) > 0) {
                     foreach ($summary['activity'] as $key => $value) {
-                        $activityPrice += !empty($value['price']) ? (int)$value['price'] : 0;
-                        $tranferPrice += !empty($value['transfer_price']) ? (int)$value['transfer_price'] : 0;
                         $activity_id = (int)$value['id'];
                         if (!in_array($activity_id, $attributes)){
                             array_push($attributes,$activity_id);
@@ -331,8 +356,6 @@ class Tour extends Bookable
                 
                 if (!empty($summary['evening_activity']) && count($summary['evening_activity']) > 0) {
                     foreach ($summary['evening_activity'] as $key => $value) {
-                        $activityPrice += !empty($value['price']) ? (int)$value['price'] : 0;
-                        $tranferPrice += !empty($value['transfer_price']) ? (int)$value['transfer_price'] : 0;
                         $activity_id = (int)$value['id'];
                         if (!in_array($activity_id, $attributes)){
                             array_push($attributes,$activity_id);
@@ -341,52 +364,78 @@ class Tour extends Bookable
                 }
             }
         }
-        $attributes = json_encode($attributes);
-        // dd($request->all());
+        
+        $meals_ids = [];
+        if (!empty($tour_summary) && count($tour_summary) > 0) {
+            foreach ($tour_summary as $key => $summary) {
+                if (!empty($summary['morning_activity']) && count($summary['morning_activity']) > 0) {
+                    foreach ($summary['morning_activity'] as $key => $value) {
+                        $activity_id = (int)$value['id'];
 
-        // $newHotelPrice = 0;
-        // if (!empty($default_hotels_input) && count($default_hotels_input)) {
-        //     foreach ($default_hotels_input as $key => $room) {
-        //         $newHotelPrice += $room['total_price'];
-        //     }
-        // }
+                        if (isset($value['attr_type']) && $value['attr_type'] ==3) {
 
+                            if (in_array($activity_id, $attributes))
+                            {
+                                unset($attributes[array_search($activity_id,$attributes)]);
+                            }
+                            array_push($meals_ids,$activity_id);
+                        }
 
-
-        $modifyPrice = 0;
-        if (!empty($default_hotels_input) && count($default_hotels_input)) {
-            foreach ($default_hotels_input as $key => $room) {
-                if (isset($room['modify_is'])) {
-                    if ($room['modify_in'] == "true") {
-                        $modifyPrice += $room['diff_price'];
-                    }else{
-                        $modifyPrice -= $room['diff_price'];
+                        
+                    }
+                }
+                if (!empty($summary['activity']) && count($summary['activity']) > 0) {
+                    foreach ($summary['activity'] as $key => $value) {
+                        $activity_id = (int)$value['id'];
+                        if (isset($value['attr_type']) && $value['attr_type'] ==3) {
+                            if (in_array($activity_id, $attributes))
+                            {
+                                unset($attributes[array_search($activity_id,$attributes)]);
+                            }
+                            array_push($meals_ids,$activity_id);
+                        }
+                    }
+                }
+                
+                if (!empty($summary['evening_activity']) && count($summary['evening_activity']) > 0) {
+                    foreach ($summary['evening_activity'] as $key => $value) {
+                        $activity_id = (int)$value['id'];
+                        if (isset($value['attr_type']) && $value['attr_type'] ==3) {
+                            if (in_array($activity_id, $attributes))
+                            {
+                                unset($attributes[array_search($activity_id,$attributes)]);
+                            }
+                            array_push($meals_ids,$activity_id);
+                        }
                     }
                 }
             }
         }
-
-        $modifyPriceIn = $modifyPrice;
+        if (count($meals_ids) > 0) {
+            $attributes = array_merge($attributes,$meals_ids);
+        }
+        
+        $attributes = json_encode(array_values($attributes));
 
         if ($meta) {
             // for Availability Calendar
-            $meta->person_types = $dataPriceAvailability['person_types'] ?? $meta->person_types;
             if ($meta->enable_person_types and !empty($meta->person_types)) {
                 if (!empty($meta->person_types)) {
                     foreach ($meta->person_types as $k => $type) {
                         if (isset($person_types_input[$k]) and $person_types_input[$k]['number']) {
                             $type['number'] = $person_types_input[$k]['number'];
-                            $type['price'] = $person_types_input[$k]['price'];
+                            $type['price'] = $meta->person_types[$k]['price'];
                             $person_types[] = $type;
-                            $total += $type['price'] * $type['number'];
+                            // $total += $type['price'] * $type['number'];
                             $total_guests += $type['number'];
                         }
                     }
                 }
             } else {
-                $total += $base_price * $request->input('guests');
+                // $total += $base_price * $request->input('guests');
                 $total_guests += $request->input('guests');
             }
+            $total += $base_price * $total_guests;
             if (!empty($applied_coupon)) {
                 if ($applied_coupon['discount_type'] == 2) {
                     $coupon_dis_amount = ($total*$applied_coupon['discount'])/100;
@@ -395,30 +444,17 @@ class Tour extends Bookable
                 }
                 $total = $total-$coupon_dis_amount;
             }
-
-
             $totalHotelPrice = 0;
             if (!empty($hotel_rooms) && count($hotel_rooms)) {
                 foreach ($hotel_rooms as $key => $room) {
-                    $totalHotelPrice = $room['price'];
-
-                    // if ($room['adults'] > 0) {
-                    //     $totalHotelPrice += $newHotelPrice * $room['adults'];
-                    // }else{
-                    //     $totalHotelPrice += $newHotelPrice * 2;
-                    // }
-
-                    // if ($room['adults'] > 1 && $room['children'] == 1) {
-                    //     $totalHotelPrice += $newHotelPrice / 2;
-                    // }else{
-                    //     $totalHotelPrice += $newHotelPrice
-                    // }
-                    // $newHotelPrice += $hotel_room['total_price'];
+                    $totalHotelPrice += $room['price'];
                 }
             }
-            $total -= $default_hotel_price;
+
             $total += $totalHotelPrice;
 
+
+            $meta->extra_price = array_values($meta->extra_price);
 
             if ($meta->enable_extra_price and !empty($meta->extra_price)) {
                 if (!empty($meta->extra_price)) {
@@ -447,37 +483,13 @@ class Tour extends Bookable
                     }
                 }
             }
-
-
             
 
-            if ($modify_activity['remove_activity_price'] > 0) {
-                 $total -= ((int)$modify_activity['remove_activity_price'] * $total_guests);
-            }
-            if ($modify_activity['add_activity_price'] > 0) {
-                $total += ((int)$modify_activity['add_activity_price'] * $total_guests);
-            }
-
-            
-
+            $total = $total + floatval($total_transfers_price);
+            $total = $total + floatval($total_sightseeing_price);
             $attributesss = getTermsById($this->tour_term->pluck('term_id'));
+            $before_sale_price = $this->before_sale_price*$total_guests;
 
-            $old_transfers_price = 0; 
-            if (isset($attributesss) && count($attributesss[22]['child']) > 0) {
-                foreach ($attributesss[22]['child'] as $key => $trans) {
-                     $old_transfers_price += $trans['transfer_price'];
-                }
-            }
-
-            $transfers_price = ($old_transfers_price+(int)$tranferPrice) * $total_guests;
- 
-
-            
-
-            
-
-           
-            
             if ($meta->discount_by_people and !empty($meta->discount_by_people)) {
                 foreach ($meta->discount_by_people as $type) {
                     if ($type['from'] <= $total_guests and (!$type['to'] or $type['to'] >= $total_guests)) {
@@ -488,7 +500,7 @@ class Tour extends Bookable
                                 $type_total = $type['amount'];
                                 break;
                             case "percent":
-                                $type_total = $transfers_price / 100 * $type['amount'];
+                                $type_total = $before_sale_price / 100 * $type['amount'];
                                 break;
                         }
                         $total -= $type_total;
@@ -503,7 +515,7 @@ class Tour extends Bookable
             $total += $base_price * $request->input('guests');
             $total_guests += $request->input('guests');
         }
-        // $modifyPrice = abs($modifyPrice) * $total_guests;
+
         $start_date = new \DateTime($request->input('start_date'));
         if (empty($start_date)) {
             return $this->sendError(__("Start date is not a valid date"));
@@ -515,13 +527,6 @@ class Tour extends Bookable
 
         //Buyer Fees for Admin
         $total_before_fees1 = $total;
-        // if ($modifyPrice > 0) {
-        //     if ($modifyPriceIn > 0) {
-        //         $total = $total+$modifyPrice;
-        //     }else {
-        //         $total = $total-$modifyPrice;
-        //     }
-        // }
         if (!empty($proposal_discount)) {
             if ($proposal_discount > 0) {
               $total += abs($proposal_discount);
@@ -584,7 +589,7 @@ class Tour extends Bookable
         $booking->vendor_service_fee = $list_service_fee ?? '';
         $booking->buyer_fees = $list_buyer_fees ?? '';
         $booking->total_before_fees = $total_before_fees1;
-        $booking->modify_price = $modifyPriceIn;
+        $booking->modify_price = 0;
         $booking->default_hotels = json_encode($default_hotels_input);
         $booking->tour_summary = json_encode($tour_summary);
         $booking->tour_attributes = $attributes;
@@ -631,8 +636,12 @@ class Tour extends Bookable
                     'fomular' => $this->getDepositFomular(),
                 ]);
             }
+            $url = $booking->getCheckoutUrl();
+            if ((!empty($request->booking_type) && $request->booking_type == 'add_by_admin') && !empty($request->enquiry_id)) {
+               $url = url('tour');
+            }
             return $this->sendSuccess([
-                'url'          => $booking->getCheckoutUrl(),
+                'url'          => $url,
                 'booking_code' => $booking->code,
             ]);
         }
@@ -1008,6 +1017,7 @@ class Tour extends Bookable
     {
         $booking_data = [
             'id'              => $this->id,
+            'base_price'      => $this->before_sale_price,
             'person_types'    => [],
             'max'             => 0,
             'open_hours'      => [],
@@ -1068,11 +1078,11 @@ class Tour extends Bookable
                     $roomBookings = $room->getCustomDatesInRange($booking_data['start_date'],$booking_data['end_date'],'single');
                         $hotelDDetail = getHotelById($type['hotel']);
                         $type['location_name'] = getLocationById($type['location_id'])->name;
-                        $type['hotel_name'] = $hotelDDetail->title;
-                        $type['hotel_img'] = url('/uploads').'/'.getImageUrlById($hotelDDetail->image_id);
-                        $type['room_name'] = $room->title;
-                        $type['room_price'] = $room->price;
-                        $type['total_price'] = $room->price*$type['days'];
+                        $type['hotel_name'] = @$hotelDDetail->title;
+                        $type['hotel_img'] = url('/uploads').'/'.getImageUrlById(@$hotelDDetail->image_id);
+                        $type['room_name'] = @$room->title;
+                        $type['room_price'] = @$room->price;
+                        $type['total_price'] = @$room->price*$type['days'];
                         $type['price_html'] = format_money($room->price * $type['days']);
                         $updatedRoomPrice += $type['total_price'];
                     }

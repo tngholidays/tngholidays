@@ -3,24 +3,14 @@
     <div class="container-fluid">
         <div class="d-flex justify-content-between mb20">
             <h1 class="title-bar">{{__("Attribute: :name",['name'=>$attr->name])}}</h1>
+            <div class="title-actions">
+                <a class="btn btn-info btn-icon" href="{{route('tour.admin.attribute.term.addTerm', $attr->id)}}" title="Add Term"> Add Term </a>
+            </div>
+
         </div>
         @include('admin.message')
         <div class="row">
-            <div class="col-md-4 mb40">
-                <div class="panel">
-                    <div class="panel-title">{{__("Add Term")}}</div>
-                    <div class="panel-body">
-                        <form action="{{route('tour.admin.attribute.term.store',['id'=>($row->id) ? $row->id : '-1','lang'=>request()->query('lang')])}}" method="post" id="attributeTermForm">
-                            @csrf
-                            @include('Tour::admin/terms/form')
-                            <div class="">
-                                <button class="btn btn-primary" type="submit">{{__("Add new")}}</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-8">
+            <div class="col-md-12">
                 <div class="filter-div d-flex justify-content-between ">
                     <div class="col-left">
                         @if(!empty($rows))

@@ -37,6 +37,7 @@ Vue.component('card3', {
         el:'#bravo_tour_book_app',
         data:{
             id:'',
+            base_price:0,
             extra_price:[],
             person_types:[],
             default_hotels:[],
@@ -65,12 +66,15 @@ Vue.component('card3', {
             start_date_obj:'',
             duration:0,
             allEvents:[],
-			buyer_fees:[],
+            buyer_fees:[],
             modifyPrice:0,
             total_modifyPrice:0,
             modify_in:true,
             couponPrice:0,
             activityPrice:0,
+            total_transfers_price:0,
+            total_sightseeing_price:0,
+            removeActivities:[],
             removeActivityPrice:0,
             removeTrnasferPrice:0,
             default_hotel_price:0,
@@ -85,6 +89,9 @@ Vue.component('card3', {
             enterCouponCode:"",
             custom_coupons: [],
             applied_coupon: "",
+            booking_id: "",
+            booking_type: null,
+            enquiry_id: null,
         },
         watch:{
             extra_price:{
@@ -120,8 +127,8 @@ Vue.component('card3', {
         },
         computed:{
             total_price:function(){
-                var me = this;
                 this.roomPriceCalculate();
+                var me = this;
                 if (me.start_date !== "") {
                     var total = 0;
                     var total_guests = 0;
@@ -163,14 +170,88 @@ Vue.component('card3', {
                         me.total_guests = total_guests;
                         total += me.guests * me.price;
                     }
-                    if (this.default_hotel_price > 0) {
-                        total -= this.default_hotel_price;
-                    }
-                    if (this.total_room_price > 0) {
-                        total += this.total_room_price;
+                    // add base price
+                    console.log(me);
+                    total = parseFloat(me.base_price)*me.total_guests;
+                    console.log('base_price',total);
+                    var totalSightseenPrice = 0;
+                    var totalTransPrice = 0;
+                    if (me.itineraries != null && me.itineraries.length > 0) {
+                        jQuery.each(me.itineraries, function(index, item) {
+                            // Transfer Price calculate accordin guests
+                            if (item.transfer != null && item.transfer.length > 0) {
+                                jQuery.each(item.transfer, function(transIdx, transVal) {
+                                    if (transVal.transfer_prices != null && transVal.transfer_prices.length > 0) {
+                                        jQuery.each(transVal.transfer_prices, function(priceIdx, priceVal) {
+                                            if (priceVal.from <= me.total_guests && priceVal.to >= me.total_guests) {
+                                                totalTransPrice += parseFloat(priceVal.amount);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+
+                            if (item.morning_activity != null && item.morning_activity.length > 0) {
+                                jQuery.each(item.morning_activity, function(transIdx, transVal) {
+                                    if(transVal.price != "" && transVal.price != null) {
+                                        totalSightseenPrice += parseFloat(transVal.price)*me.total_guests;
+                                    }
+                                    if (transVal.transfer_prices != null && transVal.transfer_prices.length > 0) {
+                                        jQuery.each(transVal.transfer_prices, function(priceIdx, priceVal) {
+                                            if (priceVal.from <= me.total_guests && priceVal.to >= me.total_guests) {
+                                                totalTransPrice += parseFloat(priceVal.amount);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+
+                            if (item.activity != null && item.activity.length > 0) {
+                                jQuery.each(item.activity, function(transIdx, transVal) {
+                                   if(transVal.price != "" && transVal.price != null) {
+                                        totalSightseenPrice += parseFloat(transVal.price)*me.total_guests;
+                                    }
+                                    if (transVal.transfer_prices != null && transVal.transfer_prices.length > 0) {
+                                        jQuery.each(transVal.transfer_prices, function(priceIdx, priceVal) {
+                                            if (priceVal.from <= me.total_guests && priceVal.to >= me.total_guests) {
+                                                totalTransPrice += parseFloat(priceVal.amount);
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+
+                            if (item.evening_activity != null && item.evening_activity.length > 0) {
+                                jQuery.each(item.evening_activity, function(transIdx, transVal) {
+                                    if(transVal.price != "" && transVal.price != null) {
+                                        totalSightseenPrice += parseFloat(transVal.price)*me.total_guests;
+                                    }
+                                    if (transVal.transfer_prices != null && transVal.transfer_prices.length > 0) {
+                                        jQuery.each(transVal.transfer_prices, function(priceIdx, priceVal) {
+                                            if (priceVal.from <= me.total_guests && priceVal.to >= me.total_guests) {
+                                                totalTransPrice += parseFloat(priceVal.amount);
+                                            }
+
+                                        });
+                                    }
+                                });
+                            }
+                        });
                     }
 
+                    console.log('totalTransPrice',totalTransPrice);
+                    console.log('totalSightseenPrice',totalSightseenPrice);
+                    console.log('total_room_price',me.total_room_price);
+                    total += totalTransPrice;
+                    total += totalSightseenPrice;
+                    total += me.total_room_price;
+
+                    console.log('total',total);
+
+                    me.total_transfers_price = totalTransPrice;
+                    me.total_sightseeing_price = totalSightseenPrice;
                     me.total_price_before_extra = total;
+                    
                     if (me.couponPrice > 0) {
                        total =  total-me.couponPrice;
                     }
@@ -201,17 +282,13 @@ Vue.component('card3', {
                     }
 
                     this.total_price_before_fee = total;
-                    // if (this.modify_in) {
-                    //     total  = total + this.total_modifyPrice;
-                    // }else {
-                    //     total  = total - this.total_modifyPrice;
+
+                    // if (this.activityPrice > 0) {
+                    //     total  += this.activityPrice * this.total_guests;
                     // }
-                    if (this.activityPrice > 0) {
-                        total  += this.activityPrice * this.total_guests;
-                    }
-                    if (this.removeActivityPrice > 0) {
-                        total  -= this.removeActivityPrice * this.total_guests;
-                    }
+                    // if (this.removeActivityPrice > 0) {
+                    //     total  -= this.removeActivityPrice * this.total_guests;
+                    // }
                     
                     var total_fee = 0;
                     for (var ix in me.buyer_fees) {
@@ -377,6 +454,12 @@ Vue.component('card3', {
                         var url      = window.location.href;     // Returns full URL (https://example.com/path/example.html)
                         var origin   = window.location.origin;
                         var fullUrl = origin+''+pathname+'?start='+me.start_date+'&end='+me.start_date+'';
+                        if (me.booking_type != "") {
+                            fullUrl += "&type="+me.booking_type;
+                        }
+                        if (me.enquiry_id != "") {
+                            fullUrl += "&enquiry="+me.enquiry_id;
+                        }
                         window.location.href = fullUrl;
                         me.couponPrice = 0;
                         me.removeApplyCoupon();
@@ -465,6 +548,10 @@ Vue.component('card3', {
             },
             addRoomPersonType(type, index){
                 var me = this;
+                if (me.total_guests >= 50) {
+                    alert('Max Pax. Limit exceed');
+                    return false;
+                }
                 var room = me.hotelrooms[index];
                 if (type == "adults" && room.adults < 3) {
                     room.adults ++ ;
@@ -479,6 +566,10 @@ Vue.component('card3', {
             },
             minusRoomPersonType(type, index){
                 var me = this;
+                if (me.total_guests >= 50) {
+                    alert('Max Pax. Limit exceed');
+                    return false;
+                }
                 var room = me.hotelrooms[index];
                 switch (type){
                     case "adults":
@@ -497,6 +588,10 @@ Vue.component('card3', {
 
             addMoreRoom(){
                 var me = this;
+                if (me.total_guests >= 50) {
+                    alert('Max Pax. Limit exceed');
+                    return false;
+                }
                 var totalRoom = parseFloat(me.hotelrooms.length)+1;
                 var room = {'adults':2,'children':0,'room':totalRoom};
                 me.hotelrooms.push(room);
@@ -513,8 +608,8 @@ Vue.component('card3', {
                 var childs = 0;
                 if (me.hotelrooms.length > 0) {
                     jQuery.each(me.hotelrooms, function(index, item) {
-                        adults += item.adults;
-                        childs += item.children;
+                        adults += parseInt(item.adults);
+                        childs += parseInt(item.children);
                     });
                 }
 
@@ -554,25 +649,27 @@ Vue.component('card3', {
                 var totalHotelPrice = 0;
 
                 if (me.hotelrooms.length > 0) {
+                    
                     jQuery.each(me.hotelrooms, function(index, item) {
-
+                        totalRoomPrice = 0;
                         if (item.adults > 1) {
-                            totalHotelPrice += singleAdultPrice * item.adults;
+                            totalRoomPrice += singleAdultPrice * item.adults;
                         }else{
-                            totalHotelPrice += singleAdultPrice * 2;
+                            totalRoomPrice += singleAdultPrice * 2;
                         }
 
 
                         if (item.adults > 1 && item.children == 1) {
-                            totalHotelPrice += (singleAdultPrice / 2);
+                            totalRoomPrice += (singleAdultPrice / 2);
                         }else if (item.children > 1) {
-                            totalHotelPrice += singleAdultPrice;
+                            totalRoomPrice += singleAdultPrice;
                         }
 
-                        item.price = totalHotelPrice;
+                        item.price = totalRoomPrice;
+                        totalHotelPrice += totalRoomPrice;
                     });
                 }
-                me.total_room_price = totalHotelPrice;
+                this.total_room_price = totalHotelPrice;
                 // this.handleTotalPrice();
             },
             openHotelsModel(event, index){
@@ -660,8 +757,7 @@ Vue.component('card3', {
                 var last_activity = [];
                 var all_ids = [];
                 var duration = 0;
-
-                
+                var attribute = currentRow.itinerary != null ? currentRow.itinerary.attribute : null;
 
                 if (me.itineraries != null && me.itineraries.length > 0) {
                     jQuery.each(me.itineraries, function(index, item) {
@@ -698,7 +794,7 @@ Vue.component('card3', {
                     dataType:"HTML",
                     type:'POST',
                     data:{
-                        'tour_id':me.id,'duration':duration,'all_ids':all_ids,'last_activity':last_activity,'location':currentRow.location_id,'attribute':currentRow.itinerary.attribute,'index':index
+                        'tour_id':me.id,'duration':duration,'all_ids':all_ids,'last_activity':last_activity,'location':currentRow.location_id,'attribute':attribute,'index':index
                     },
                     success:function (data) {
                        $('#change_tour_activity').html(data);
@@ -727,7 +823,57 @@ Vue.component('card3', {
                 var totalP = parseFloat(price)+parseFloat(transfer_price);
                 me.removeActivityPrice = parseFloat(me.removeActivityPrice) + parseFloat(totalP);
                 me.removeTrnasferPrice = parseFloat(transfer_price);
+       
+                me.removeActivities.push(activity[actIndex].id);
                 activity.splice(actIndex,1);
+            },
+            openMealModel(event, index){
+                // $('.loading-all').show();
+                var me = this;
+                var currentRow = me.itineraries[index];
+                me.currentTarget = event.currentTarget;
+                var all_ids = [];
+                
+                if (currentRow.morning_activity != null && currentRow.morning_activity.length > 0) {
+                    jQuery.each(currentRow.morning_activity, function(index2, item2) {
+                        if (item2.attr_type !="" && item2.attr_type == 3) {
+                            all_ids.push(item2.id);
+                        }
+                    });
+                }
+                if (currentRow.activity != null && currentRow.activity.length > 0) {
+                    jQuery.each(currentRow.activity, function(index2, item2) {
+                       if (item2.attr_type !="" && item2.attr_type == 3) {
+                            all_ids.push(item2.id);
+                        }
+                    });
+                }
+                if (currentRow.evening_activity != null && currentRow.evening_activity.length > 0) {
+                    jQuery.each(currentRow.evening_activity, function(index2, item2) {
+                        if (item2.attr_type !="" && item2.attr_type == 3) {
+                            all_ids.push(item2.id);
+                        }
+                    });
+                }
+
+                $.ajax({
+                    url:bookingCore.url + '/getTourMeals',
+                    dataType:"HTML",
+                    type:'POST',
+                    data:{
+                        'tour_id':me.id,'location_id':currentRow.location_id,'all_ids':all_ids,'index':index
+                    },
+                    success:function (data) {
+                       $('#change_tour_activity').html(data);
+                       $('#change_tour_activity').modal('show');
+                       // $('#change_tour_activity').find('#changeFromHotel').val('');
+                       $('.loading-all').hide();
+                    },
+                    error:function (e) {
+                        console.log(e);
+                        console.log("Can not get availability");
+                    }
+                });
             },
             removeApplyCoupon() {
                 $('.coupon-block').closest('.coupon-block').find('.coupon-list').removeClass('active');
@@ -833,6 +979,9 @@ Vue.component('card3', {
                     'add_activity_price':this.activityPrice,
                     'remove_activity_price':this.removeActivityPrice,
                     'remove_trnasfer_price':this.removeTrnasferPrice,
+                    'remove_activities':this.removeActivities,
+                    'total_transfers_price':this.total_transfers_price,
+                    'total_sightseeing_price':this.total_sightseeing_price,
                 }
                 $.ajax({
 
@@ -849,7 +998,10 @@ Vue.component('card3', {
                         modify_activity:modify_activity,
                         default_hotel_price:this.default_hotel_price,
                         hotel_rooms:this.hotelrooms,
-                        guests:this.guests
+                        booking_id:this.booking_id,
+                        guests:this.guests,
+                        booking_type:this.booking_type,
+                        enquiry_id:this.enquiry_id
                     },
                     dataType:'json',
                     type:'post',
@@ -871,6 +1023,7 @@ Vue.component('card3', {
                         }
 
                         if(res.url){
+                            alert('Booking Enquiry Successfully Submitted');
                             window.location.href = res.url
                         }
 
@@ -1013,6 +1166,9 @@ Vue.component('card3', {
             openActivityModel(event, index){
                 vuejsArray.openActivityModel(event, index);
             },
+            openMealModel(event, index){
+                vuejsArray.openMealModel(event, index);
+            },
             removeActivity(event, index, actIndex, timezone){
                 vuejsArray.removeActivity(event, index, actIndex, timezone);
             },
@@ -1075,6 +1231,7 @@ Vue.component('card3', {
     });
 
     jQuery(document).on("click", ".changeHotelNow", function () {
+         var hotelType = $(this).data('type');
          var dataIndex = $(vuejsArray.currentTarget).closest('.form-group').attr('data-index');
          var hotelDetail = $(this).closest('.makeFlex').find('.default_hotels').val();
          hotelDetail = JSON.parse(hotelDetail);
@@ -1082,19 +1239,29 @@ Vue.component('card3', {
          default_hotels['hotel'] = hotelDetail.hotel;
          default_hotels['hotel_img'] = hotelDetail.hotel_img;
          default_hotels['hotel_name'] = hotelDetail.hotel_name;
-         default_hotels['room'] = hotelDetail.room
-         default_hotels['room_name'] = hotelDetail.room_name
-         default_hotels['room_price'] = hotelDetail.room_price
-         default_hotels['total_price'] = hotelDetail.total_price
-         default_hotels['diff_price'] = hotelDetail.totalDiffPrice
+         default_hotels['room'] = hotelDetail.room;
+         default_hotels['room_name'] = hotelDetail.room_name;
+         default_hotels['room_price'] = hotelDetail.room_price;
+         default_hotels['total_price'] = hotelDetail.total_price;
+         default_hotels['diff_price'] = hotelDetail.totalDiffPrice;
+         default_hotels['alternate_hotel'] = false;
+         default_hotels['alternate_hotel_name'] = null;
+         default_hotels['alternate_hotel_address'] = null;
          default_hotels['modify_is'] = true;
          if (hotelDetail.rateFlag) { 
             default_hotels['modify_in'] = true;
          }else{
             default_hotels['modify_in'] = false;
          }
-         $('#change_booking_hotel').modal('hide');
+         if (vuejsArray.alternateHotelDeatils.length > 0 && hotelType==1) {
+            default_hotels['alternate_hotel'] = true;
+            default_hotels['hotel_name'] = vuejsArray.alternateHotelDeatils[0].hotel_name;
+            default_hotels['alternate_hotel_name'] = vuejsArray.alternateHotelDeatils[0].hotel_name;
+            default_hotels['alternate_hotel_address'] = vuejsArray.alternateHotelDeatils[0].hotel_address;
+            vuejsArray.alternateHotelDeatils = [];
+         }
          updateHotels(vuejsArray);
+         $('#change_booking_hotel').modal('hide');
          totalPrice(vuejsArray, hotelDetail.totalDiffPrice, hotelDetail.rateFlag);
         
     });
@@ -1103,6 +1270,46 @@ Vue.component('card3', {
         $('body').addClass('modal-open');
       }
     })
+    jQuery(document).on("keyup", ".searchInputBox", function () {
+        var filter = $(this).data('search');
+        var filter_items = $(this).closest('.dataFilterDiv').find('.dataFilter .data_filter');
+        var search_val = $(this).val();
+
+        if (search_val != '' ) {
+            filter_items.addClass('search-hide');
+            $(this).closest('.dataFilterDiv').find('.dataFilter').find(`[data-filter-${filter}*="${search_val.toLowerCase()}"]`).removeClass('search-hide');
+        } else {
+            filter_items.removeClass('search-hide');
+        }
+    });
+
+    jQuery(document).on("click", ".changeHotelNow", function () {
+    });
+    jQuery(document).on("click", ".chooseAlternateHotel", function () {
+        $('#noHotelModal').modal('show');
+    });
+    jQuery(document).on("click", ".addAlternateHotel", function () {
+        var thisfrom = $(this).closest('form');
+        var flg = true;
+        $($(thisfrom).find('input')).each(function () {
+            if ($(this).val() != "") {
+                $(this).css('border', '');
+            }else{
+                $(this).css('border', 'solid 1px red');
+                flg = false;
+            }
+        });
+        if (flg) {
+            var formData = $(this).closest('form').serializeArray();
+            var alternateHotelDeatils = {'index':null,'hotel_name':formData[0].value,'hotel_address':formData[1].value};
+            vuejsArray.alternateHotelDeatils.push(alternateHotelDeatils);
+            $('#change_booking_hotel ul li .NoHotelDiv').click();
+            $('#noHotelModal').modal('hide');
+
+        }
+
+        
+    });
     jQuery(document).on("click", ".changeActivity", function () {
         var price = $(this).data('price');
         var index = $(this).data('index');
@@ -1130,8 +1337,50 @@ Vue.component('card3', {
                 currentRow.activity = [];
             }
             currentRow.activity.push(term);
+            if (vuejsArray.removeActivities.length > 0) {
+                if(jQuery.inArray(term.id, vuejsArray.removeActivities) !== -1){
+                    vuejsArray.removeActivities = vuejsArray.removeActivities.splice(vuejsArray.removeActivities.indexOf(term.id),1);
+                }
+            }
         }
         
+        // vuejsArray
+        // console.log(currentRow);
+        $('#change_tour_activity').modal('hide');
+        // var roomEvent = $(vuejsArray.currentTarget).closest('.group-btns').find('.change-room');
+        // var index = $(vuejsArray.currentTarget).closest('.form-group').attr('data-index');
+        
+        // vuejsArray.openRoomsModelJquery(roomEvent, default_hotels);
+    });
+
+    jQuery(document).on("click", ".changeMeal", function () {
+        var price = $(this).data('price');
+        var index = $(this).data('index');
+        var timezone = $(this).data('timezone');
+        vuejsArray.activityPrice =  parseFloat(vuejsArray.activityPrice) + Math.abs(price);
+        // if (vuejsArray.removeActivityPrice > vuejsArray.activityPrice) {
+        //     vuejsArray.removeActivityPrice = vuejsArray.removeActivityPriceremoveActivityPrice - Math.abs(price);
+        // }
+        
+        var currentRow = vuejsArray.itineraries[index];
+        var term = $(this).closest('.makeFlex').find('.json_input').val();
+        term = JSON.parse(term);
+        if (timezone == 1) {
+            if (currentRow.morning_activity == null) {
+                currentRow.morning_activity = [];
+            }
+            currentRow.morning_activity.push(term);
+        }else if(timezone == 3){
+            if (currentRow.evening_activity == null) {
+                currentRow.evening_activity = [];
+            }
+            currentRow.evening_activity.push(term);
+        }else {
+            if (currentRow.activity == null) {
+                currentRow.activity = [];
+            }
+            currentRow.activity.push(term);
+        }
         // vuejsArray
         // console.log(currentRow);
         $('#change_tour_activity').modal('hide');

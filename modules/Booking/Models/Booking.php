@@ -96,7 +96,12 @@ class Booking extends BaseModel
 
         $activities = array();
         $hotelIndex = 0;
+        $k = 0;
         foreach ($tour_summary as $key => $summary) {
+            $dateDay = "+$k day";
+            $default_date = date('d/m/Y', strtotime($this->start_date . $dateDay));
+             $summary['date'] = $default_date;
+            
             $rowspan = 1;
             if (!empty($summary['transfer']) && count($summary['transfer']) > 0) {
                 $rowspan += count($summary['transfer']);
@@ -134,19 +139,30 @@ class Booking extends BaseModel
                 'rowspan' => $rowspan,
             );
             if (!empty($summary['transfer']) && count($summary['transfer']) > 0) {
-                foreach ($summary['transfer'] as $key => $transfer) {
-                    $arrayData['transfer'][] = $transfer;
-                }
+                 foreach ($summary['transfer'] as $key => $value) {
+                        $value['transfer_price'] = isset($value['transfer_prices']) ?  getTransPriceByAdult($value['transfer_prices'], $this->total_guests) ?? 0 : $value['transfer_price'];
+                        $value['transfer_price'] = intval($value['transfer_price']);
+                        $value['date'] = $default_date;
+                        $arrayData['transfer'][] = $value;
+                    }
             }
             if (!empty($summary['morning_activity']) && count($summary['morning_activity']) > 0) {
                 foreach ($summary['morning_activity'] as $key => $value) {
+                    $value['transfer_price'] = isset($value['transfer_prices']) ?  getTransPriceByAdult($value['transfer_prices'], $this->total_guests) ?? 0 : 0;
+                        $value['transfer_price'] = intval($value['transfer_price']);
+                        $value['date'] = $default_date;
                     $arrayData['morning_activity'][] = $value;
                 }
                 
             }
+            
             if (!empty($summary['hotel']) && count($summary['hotel']) > 0) {
 
                 $default_hotel = json_decode($this->default_hotels, true)[$hotelIndex];
+                
+                $hotel_rooms = json_decode($this->getMeta('hotel_rooms'), true);
+                
+                $roomWisePrice = roomWiseHotelPrice($default_hotel['total_price'], $hotel_rooms);
                 
                 if ($summary['hotel']['hotel'] != $default_hotel['hotel']) {
                     $summary['hotel']['hotel'] = $default_hotel['hotel'];
@@ -158,12 +174,16 @@ class Booking extends BaseModel
                      $summary['hotel']['total_price'] = $default_hotel['total_price'];
                      
                 }
+                $summary['hotel']['total_room_price'] = $roomWisePrice;
                 $arrayData['hotel'] = $summary['hotel'];
                  
                 $hotelIndex +=1;
             }
             if (!empty($summary['activity']) && count($summary['activity']) > 0) {
                 foreach ($summary['activity'] as $key => $value) {
+                    $value['transfer_price'] = isset($value['transfer_prices']) ?  getTransPriceByAdult($value['transfer_prices'], $this->total_guests) ?? 0 : $value['transfer_price'];
+                        $value['transfer_price'] = intval($value['transfer_price']);
+                        $value['date'] = $default_date;
                     $arrayData['activity'][] = $value;
                 }
                 
@@ -171,11 +191,15 @@ class Booking extends BaseModel
             
             if (!empty($summary['evening_activity']) && count($summary['evening_activity']) > 0) {
                 foreach ($summary['evening_activity'] as $key => $value) {
+                    $value['transfer_price'] = isset($value['transfer_prices']) ?  getTransPriceByAdult($value['transfer_prices'], $this->total_guests) ?? 0 : $value['transfer_price'];
+                        $value['transfer_price'] = intval($value['transfer_price']);
+                        $value['date'] = $default_date;
                     $arrayData['evening_activity'][] = $value;
                 }
                 
             }
             $activities[] = $arrayData;
+            $k++;
         }
         return $activities;
     }
@@ -183,19 +207,25 @@ class Booking extends BaseModel
     public function allActivities(){
         $activities = array();
         $tour_summary = $this->activities();
-        
 
         foreach ($tour_summary as $key => $summary) {
             if (!empty($summary['transfer']) && count($summary['transfer']) > 0) {
-                foreach ($summary['transfer'] as $actkey => $transfer) {
-                    $transfer['date'] = $summary['date'];
-                    $activities[] = $transfer;
+                foreach ($summary['transfer'] as $actkey => $value) {
+                    $value['date'] = $summary['date'];
+                    $attribute = @getAttributeByTerm($value['attr_id']);
+                    $value['attr_type'] =  @$attribute->type;
+                    $value['attr_name'] =  @$attribute->name;
+                    $value['attr_location'] =  @$attribute->location;
+                    $activities[] = $value;
                 }
             }
 
             if (!empty($summary['morning_activity']) && count($summary['morning_activity']) > 0) {
                 foreach ($summary['morning_activity'] as $actkey => $value) {
                     $value['date'] = $summary['date'];
+                    $attribute = @getAttributeByTerm($value['attr_id']);
+                    $value['attr_type'] =  @$attribute->type;
+                    $value['attr_name'] =  @$attribute->name;
                     $activities[] = $value;
                 }
             }
@@ -209,6 +239,9 @@ class Booking extends BaseModel
             if (!empty($summary['activity']) && count($summary['activity']) > 0) {
                 foreach ($summary['activity'] as $actkey => $value) {
                     $value['date'] = $summary['date'];
+                    $attribute = @getAttributeByTerm($value['attr_id']);
+                    $value['attr_type'] =  @$attribute->type;
+                    $value['attr_name'] =  @$attribute->name;
                     $activities[] = $value;
                 }
             }
@@ -216,6 +249,9 @@ class Booking extends BaseModel
             if (!empty($summary['evening_activity']) && count($summary['evening_activity']) > 0) {
                 foreach ($summary['evening_activity'] as $actkey => $value) {
                     $value['date'] = $summary['date'];
+                    $attribute = @getAttributeByTerm($value['attr_id']);
+                    $value['attr_type'] =  @$attribute->type;
+                    $value['attr_name'] =  @$attribute->name;
                     $activities[] = $value;
                 }
                 

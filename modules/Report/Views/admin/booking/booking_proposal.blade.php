@@ -282,65 +282,454 @@ button, input, optgroup, select, textarea {
                         						</div>
                         					</div>
             				@if(!empty($tour->id))
-            					   <div class="panel">
-            						    <div class="panel-title"><strong>Day-Wise Itinerary</strong></div>
-            						    <div class="panel-body">
-             								<div class="form-group-item">
-            								    <div class="g-items-header">
-            								        <div class="row">
-            								            <div class="col-md-3">Date<br>(dd/mm/yyyy)</div>
-            								            <div class="col-md-7">Plan</div>
-            								        </div>
-            								    </div>
-            								    <div class="g-items">
-                                  <?php
-                                  if (!empty($row->start_date)) {
-                                    $start_date = $row->start_date;
-                                    $start_date = date('Y-m-d', strtotime($start_date));
-                                  }else {
-                                    $start_date = str_replace("/", "-", $enquiry->approx_date);
-                                    $start_date = date('Y-m-d', strtotime($start_date));
-                                  }
-                                  if (!empty($row->default_hotels)) {
-                                    $default_hotels = $row->default_hotels;
-                                  }else {
-                                    $default_hotels = $tour->meta->default_hotels;
-                                  }
-                                  ?>
-            								    	<?php $rowItinerary = $row->itinerary; $i = 0; $today = $start_date?>
-            								    @if(!empty($tour->itinerary))
-            						            <?php if(!is_array($tour->itinerary)) $tour->itinerary = json_decode($tour->itinerary); ?>
-            							            @foreach($tour->itinerary as $key=>$itinerary)
-            							            <?php
-            							            	$hasItinerary = isset($rowItinerary[$i]['date']) ? true : false;
-            							            	$dayPlus = "+$i day";
-            							            	$default_date = date('d/m/Y', strtotime($today . $dayPlus));
-            							            	// dd($default_date);
-            							            ?>
-            							            <input type="hidden" name="itinerary[{{$i}}][image_id]" value="{{$itinerary['image_id']}}">
-                                      <input type="hidden" name="itinerary[{{$i}}][title]" value="{{$itinerary['title']}}">
-                                      <input type="hidden" name="itinerary[{{$i}}][desc]" value="{{$itinerary['desc']}}">
-                                      <input type="hidden" name="itinerary[{{$i}}][content]" value="{{$itinerary['content']}}">
-            									        <div class="item">
-            									            <div class="row">
-            									                <div class="col-md-3">
-            									                	<div class="calDiv">
-            												        <input type="text" name="itinerary[{{$i}}][date]" class="form-control datePicker" value="{{$hasItinerary ? $rowItinerary[$i]['date'] : $default_date}}" placeholder="Date" />
-            												        <input type="hidden" name="itinerary[{{$i}}][time]" class="form-control" value="" placeholder="Time" />
-            									                 <span><i class="fa fa-calendar" aria-hidden="true"></i></span>
-            								                </div>
-            									                </div>
-            									                <div class="col-md-7">{{$itinerary['desc'] ?? ""}} <br></div>
-            									            </div>
-            									        </div>
-            									        <?php $i++; ?>
-            									    @endforeach
-                    							@endif
-            								    </div>
-            							    </div>
-            							</div>
-            						</div>
+            					    <div class="panel">
+                                        <div class="panel-title"><strong>Day-Wise Itinerary</strong>
+                                        <a href="#" class="btn btn-primary"><i class="fa fa-edit"></i> Edit Itinerary</a>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="form-group-item">
+                                                <div class="g-items-header">
+                                                    <div class="row">
+                                                        <div class="col-md-3">
+                                                            Date<br />
+                                                            (dd/mm/yyyy)
+                                                        </div>
+                                                        <div class="col-md-10">Plan</div>
+                                                    </div>
+                                                </div>
+                                                <div class="g-items">
+                                                    <?php
+                                                        $i = 0; $tour_activities = $booking->activities();
+                                                    ?> 
+                                                    @if(!empty($tour_activities)) 
+                                                    @foreach($tour_activities as $key=>$summary)
+                                                    <?php $default_date = date('d/m/Y', strtotime($summary['date'])); ?>
+                                                    <div class="item">
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <p><strong>{{$summary['date'] ? $summary['date'] : ''}}, Day {{$key+1}}</strong></p>
+                                                            </div>
+                                                            <div class="col-md-9">
+                                                                @if(!empty($summary['breackfast']))
+                                                                <div class="row">
+                                                                    <div class="col-md-12">{{$summary['breackfast'] ?? ""}} <br /></div>
+                                                                </div>
+                                                                @endif 
+                                                                @if(count($summary['transfer']) > 0)
+                                                                @foreach($summary['transfer'] as $keyy =>$transfer)
+                                                                <div class="row">
+                                                                    <div class="col-md-12">{{$transfer['name'] ?? ""}} <br /></div>
+                                                                </div>
+                                                                @endforeach
+                                                                @endif
+                                                                @if(count($summary['hotel']) > 0)
+                                                                <div class="row">
+                                                                    <div class="col-md-12">{{$summary['hotel']['hotel_name'] ?? ""}} <br /></div>
+                                                                </div>
+                                                                @endif 
+                                                                @if(count($summary['morning_activity']) > 0) @foreach($summary['morning_activity'] as $key=>$activity)
+                                                                <div class="row">
+                                                                    <div class="col-md-12">{{$activity['name'] ?? ""}} <br /></div>
+                                                                </div>
+                                                                @endforeach @endif @if(count($summary['activity']) > 0) @foreach($summary['activity'] as $key=>$activity)
+                                                                <div class="row">
+                                                                    <div class="col-md-12">{{$activity['name'] ?? ""}} <br /></div>
+                                                                </div>
+                                                                @endforeach @endif @if(count($summary['evening_activity']) > 0) @foreach($summary['evening_activity'] as $key=>$activity)
+                                                                <div class="row">
+                                                                    <div class="col-md-12">{{$activity['name'] ?? ""}} <br /></div>
+                                                                </div>
+                                                                @endforeach @endif
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    @endforeach @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel">
+                                        <div class="panel-title"><strong>Tour Price</strong></div>
+                                        <div class="panel-body">
+                                            <div class="email_new_booking">
+                                                <?php
+                                                    $translation = $tour->translateOrOrigin(app()->getLocale());
+                                                    $lang_local = app()->getLocale();
+                                                    $hotel_rooms = json_decode($booking->getMeta('hotel_rooms'), true);
+                                                    ;
+                                                    ?>
+                                                    <div class="b-table-wrap">
+                                                        <table class="b-table table table-bordered">
+                                                            <tr>
+                                                                <td class="label">{{__('Booking Number')}}</td>
+                                                                <td class="val">#{{$booking->id}}</td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="label">{{__('Booking Status')}}</td>
+                                                                <td class="val">{{$booking->statusName}}</td>
+                                                            </tr>
+                                                            @if($booking->gatewayObj)
+                                                                <tr>
+                                                                    <td class="label">{{__('Payment method')}}</td>
+                                                                    <td class="val">{{$booking->gatewayObj->getOption('name')}}</td>
+                                                                </tr>
+                                                            @endif
+                                                            <tr>
+                                                                <td class="label">{{__('Tour name')}}</td>
+                                                                <td class="val">
+                                                                    <a href="{{$tour->getDetailUrl()}}">{!! clean($translation->title) !!}</a>
+                                                                </td>
 
+                                                            </tr>
+                                                            <tr>
+                                                                @if($translation->address)
+                                                                    <td class="label">{{__('Address')}}</td>
+                                                                    <td class="val">
+                                                                        {{$translation->address}}
+                                                                    </td>
+                                                                @endif
+                                                            </tr>
+                                                            @if($booking->start_date && $booking->end_date)
+                                                                <tr>
+                                                                    <td class="label">{{__('Start date')}}</td>
+                                                                    <td class="val">{{display_date($booking->start_date)}}</td>
+                                                                </tr>
+
+                                                                <tr>
+                                                                    <td class="label">{{__('Duration:')}}</td>
+                                                                    <td class="val">
+                                                                        {{human_time_diff($booking->end_date,$booking->start_date)}}
+                                                                    </td>
+                                                                </tr>
+                                                            @endif
+                                                            
+                                                            @php $person_types = $booking->getJsonMeta('person_types')
+                                                            @endphp
+                                                            
+
+                                                            @if(!empty($person_types))
+                                                                @foreach($person_types as $type)
+                                                                    <tr>
+                                                                        <td class="label">{{$type['name']}}:</td>
+                                                                        <td class="val">
+                                                                            <strong>{{$type['number']}}</strong>
+                                                                        </td>
+                                                                    </tr>
+                                                                @endforeach
+                                                            @else
+                                                                <tr>
+                                                                    <td class="label">{{__("Guests")}}:</td>
+                                                                    <td class="val">
+                                                                        <strong>{{$booking->total_guests}}</strong>
+                                                                    </td>
+                                                                </tr>
+                                                            @endif
+                                                            <?php $totalHotelPrice = 0; ?>
+                                                            @if(!empty($booking->default_hotels) && $booking->default_hotels != "null")
+                                                                <tr>
+                                                                    <td class="label">{{__("Hotels")}}:</td>
+                                                                        <td class="val no-r-padding">
+                                                                            <table class="pricing-list" width="100%">
+                                                                                <tr>
+                                                                                    <th class="label">Location</th>
+                                                                                    <th class="label">Hotel</th>
+                                                                                    <th class="label">Room</th>
+                                                                                </tr>
+                                                                                @if(json_decode($booking->default_hotels, true) > 0)
+                                                                                @foreach (json_decode($booking->default_hotels, true) as $indx => $hotel)
+                                                                                <?php $hotelDDetail = getHotelById($hotel['hotel']); $totalHotelPrice += $hotel['total_price'] ?>
+                                                                                    <tr>
+                                                                                        <td class="label">{{@getLocationById($hotel['location_id'])->name}}</td>
+                                                                                        <td class="label">{{$hotelDDetail->title}} </td>
+                                                                                        <td class="label">{{@getRoomsById($hotel['room'])->title}}</td>
+                                                                                    </tr>
+                                                                                @endforeach
+                                                                                @endif
+                                                                            </table>
+                                                                            <br>
+                                                                            <table class="table table-bordered" width="100%">
+                                                                                <tr>
+                                                                                    <th class="label">Room</th>
+                                                                                    <th class="label">Persons</th>
+                                                                                </tr>
+                                                                                @if($hotel_rooms > 0)
+                                                                                @foreach ($hotel_rooms as $indx => $room)
+                                                                                    <tr>
+                                                                                        <td class="label">Room {{$room['room']}}</td>
+                                                                                        <td class="label">
+                                                                                            <strong>Adult :</strong> {{$room['adults']}},
+                                                                                            <strong>Child :</strong> {{$room['children']}}
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                @endforeach
+                                                                                @endif
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                <tr>
+                                                            @endif
+                                                            
+                                                                <td class="label">{{__('Pricing')}}</td>
+                                                                <td class="val no-r-padding">
+                                                                    <table class="pricing-list" width="100%">
+                                                                        @php $person_types = $booking->getJsonMeta('person_types')
+                                                                        @endphp
+                                                                        <?php $default_pkg_price = 0;  ?>
+                                                                        @if(!empty($person_types))
+                                                                            @foreach($person_types as $type)
+                                                                             
+                                                                                <tr>
+                                                                                    <td class="label">{{$type['name']}}: {{$type['number']}} * {{format_money($type['price'])}}</td>
+                                                                                    <td class="val no-r-padding">
+                                                                                        <strong>{{format_money($type['price'] * $type['number'])}}</strong>
+                                                                                        <?php $base_price = $type['price'] * $type['number']; 
+                                                                                         $default_pkg_price += $base_price;
+                                                                                        ?>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            @endforeach
+                                                                        @else
+                                                                        
+                                                                            <tr>
+                                                                                <td class="label">{{__("Guests")}}: {{$booking->total_guests}} {{format_money($booking->getMeta('base_price'))}}</td>
+                                                                                <td class="val no-r-padding">
+                                                                                    <strong>{{format_money($booking->getMeta('base_price') * $booking->total_guests)}}</strong>
+                                                                                    <?php 
+                                                                                    $base_price = $booking->getMeta('base_price') * $booking->total_guests; 
+                                                                                    $default_pkg_price += $base_price;
+                                                                                    ?>
+
+                                                                                </td>
+                                                                            </tr>
+                                                                        @endif
+
+                                                                        @if(!empty($booking->applied_coupon) && $booking->applied_coupon != "null")
+                                                                        <?php
+                                                                            $applied_coupon = json_decode($booking->applied_coupon, true);
+                                                                            if (!empty($applied_coupon)) {
+                                                                                if ($applied_coupon['discount_type'] == 2) {
+                                                                                    $coupon_dis_amount = ($base_price*$applied_coupon['discount'])/100;
+                                                                                }else{
+                                                                                    $coupon_dis_amount = $applied_coupon['discount'];
+                                                                                }
+                                                                            }
+                                                                        ?>
+                                                                            <tr>
+                                                                                <td colspan="2" class="label-title"><strong>{{__("Coupon Discount:")}}</strong></td>
+                                                                            </tr>
+                                                                            <tr class="">
+                                                                                <td colspan="2" class="no-r-padding no-b-border">
+                                                                                    <table width="100%">
+                                                                                        <tr>
+                                                                                            <td class="label">
+                                                                                                {{$applied_coupon['code']}}
+                                                                                                :
+                                                                                            </td>
+                                                                                            <td class="val no-r-padding">
+                                                                                                <strong>- {{format_money($coupon_dis_amount ?? 0)}}</strong>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    </table>
+                                                                                </td>
+                                                                            </tr>
+                                                                        @endif
+                                                                        @php $extra_price = $booking->getJsonMeta('extra_price');
+                                                                            $totalExtraPrice = 0;
+                                                                        @endphp
+
+                                                                        @if(!empty($extra_price))
+                                                                            <tr>
+                                                                                <td colspan="2" class="label-title"><strong>{{__("Extra Charges:")}}</strong></td>
+                                                                            </tr>
+                                                                            <tr class="">
+                                                                                <td colspan="2" class="no-r-padding no-b-border">
+                                                                                    <table width="100%">
+                                                                                    @foreach($extra_price as $type)
+                                                                                        <tr>
+                                                                                            <td class="label">{{$type['name']}}:</td>
+                                                                                            <td class="val no-r-padding">
+                                                                                                <strong>{{format_money($type['total'] ?? 0)}}</strong>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                        <?php $totalExtraPrice += $type['total'] ?? 0; ?>
+                                                                                    @endforeach
+                                                                                    </table>
+                                                                                </td>
+                                                                            </tr>
+
+                                                                        @endif
+
+                                                                         @php $discount_by_people = $booking->getJsonMeta('discount_by_people');
+                                                                        $discount_by_peoplePrice = 0;
+                                                                        @endphp
+                                                                        @if(!empty($discount_by_people))
+                                                                            <tr>
+                                                                                <td colspan="2" class="label-title"><strong>{{__("Discounts:")}}</strong></td>
+                                                                            </tr>
+                                                                            <tr class="">
+                                                                                <td colspan="2" class="no-r-padding no-b-border">
+                                                                                    <table width="100%">
+                                                                                    @foreach($discount_by_people as $type)
+                                                                                        <tr>
+                                                                                            <td class="label">
+                                                                                                @if(!$type['to'])
+                                                                                                    {{__('from :from guests',['from'=>$type['from']])}}
+                                                                                                @else
+                                                                                                    {{__(':from - :to guests',['from'=>$type['from'],'to'=>$type['to']])}}
+                                                                                                @endif
+                                                                                                :
+                                                                                            </td>
+                                                                                            <td class="val no-r-padding">
+                                                                                                <strong>- {{format_money($type['total'] ?? 0)}}</strong>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                        <?php  $discount_by_peoplePrice += $type['total'] ?? 0; ?>
+                                                                                    @endforeach
+                                                                                    </table>
+                                                                                </td>
+                                                                            </tr>
+                                                                        @endif
+                                                                         <?php $modify_price_room = $booking->total - $default_pkg_price;?>
+                                                                        @if($modify_price_room > 0)
+                                                                            <tr>
+                                                                                <td class="label">
+                                                                                   Modify Price
+                                                                                </td>
+                                                                                <td class="val">
+                                                                                     {{format_money($modify_price_room)}}
+                                                                                </td>
+                                                                            </tr>
+                                                                        @endif
+                                                                        @if(!empty($booking->proposal_discount) && $booking->proposal_discount != 'null')
+                                                                            <tr>
+                                                                                <td class="label">
+                                                                                   {{($booking->proposal_discount > 0) ? 'Service Changes' : 'Extra Discount' }}
+                                                                                </td>
+                                                                                <td class="val">
+                                                                                  @if($booking->proposal_discount > 0)
+                                                                                  <?php  $booking->total_before_fees = $booking->total_before_fees + abs($booking->proposal_discount); ?>
+                                                                                  + {{format_money(abs($booking->proposal_discount))}}
+                                                                                  @else
+                                                                                  <?php  $booking->total_before_fees = $booking->total_before_fees - abs($booking->proposal_discount); ?>
+                                                                                  - {{format_money(abs($booking->proposal_discount))}}
+                                                                                  @endif
+                                                                                </td>
+                                                                            </tr>
+                                                                        @endif
+                                                                        <tr>
+                                                                            <td class="label">
+                                                                               Sub Total
+                                                                            </td>
+                                                                            <td class="val">
+                                                                                {{format_money($booking->total)}}
+                                                                            </td>
+                                                                        </tr>
+                                                                        @php
+                                                                            $list_all_fee = [];
+                                                                            if(!empty($booking->buyer_fees)){
+                                                                                $buyer_fees = json_decode($booking->buyer_fees , true);
+                                                                                $list_all_fee = $buyer_fees;
+                                                                            }
+                                                                            if(!empty($vendor_service_fee = $booking->vendor_service_fee)){
+                                                                                $list_all_fee = array_merge($list_all_fee , $vendor_service_fee);
+                                                                            }
+                                                                        @endphp
+                                                                        @if(!empty($list_all_fee))
+                                                                            @foreach ($list_all_fee as $item)
+                                                                                @php
+                                                                                    $fee_price = $item['price'];
+                                                                                    if(!empty($item['unit']) and $item['unit'] == "percent"){
+                                                                                        $fee_price = ( $booking->total_before_fees / 100 ) * $item['price'];
+                                                                                    }
+                                                                                @endphp
+                                                                                <tr>
+                                                                                    <td class="label">
+                                                                                        {{$item['name_'.$lang_local] ?? $item['name']}}
+                                                                                        <i class="icofont-info-circle" data-toggle="tooltip" data-placement="top" title="{{ $item['desc_'.$lang_local] ?? $item['desc'] }}"></i>
+                                                                                        @if(!empty($item['per_person']) and $item['per_person'] == "on")
+                                                                                            : {{$booking->total_guests}} * {{format_money( $fee_price )}}
+                                                                                        @endif
+                                                                                    </td>
+                                                                                    <td class="val">
+                                                                                        @if(!empty($item['per_person']) and $item['per_person'] == "on")
+                                                                                            {{ format_money( $fee_price * $booking->total_guests ) }}
+                                                                                        @else
+                                                                                            {{ format_money( $fee_price ) }}
+                                                                                        @endif
+                                                                                    </td>
+                                                                                </tr>
+                                                                            @endforeach
+                                                                        @endif
+
+                                                                    </table>
+                                                                </td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="label fsz21">{{__('Total')}}  <button class="btn btn-primary text-right" type="button" data-toggle="modal" data-target="#costSummaryModal">Cost Summary</button></td>
+                                                                <td class="val fsz21"><strong style="color: #FA5636">{{format_money($booking->total)}}</strong></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="label fsz21">{{__('Hotel Price')}}</td>
+                                                                <td class="val fsz21"><strong style="color: #FA5636">{{format_money($totalHotelPrice)}}</strong></td>
+                                                            </tr>
+                                                            <tr>
+                                                                <td class="label fsz21">{{__('Paid')}}</td>
+                                                                <td class="val fsz21"><strong style="color: #FA5636">{{format_money($booking->paid)}}</strong></td>
+                                                            </tr>
+                                                            @if($booking->total > $booking->paid)
+                                                                <tr>
+                                                                    <td class="label fsz21">{{__('Remain')}}</td>
+                                                                    <td class="val fsz21"><strong style="color: #FA5636">{{format_money($booking->total - $booking->paid)}}</strong></td>
+                                                                </tr>
+                                                            @endif
+                                                        </table>
+                                                    </div>
+
+                                            </div>
+                                            <div class="row TotalPriceSection">
+                                                <div class="col-lg-4">
+                                                    <div class="form-group">
+                                                        <label class="control-label">{{__("Total Price")}}</label>
+                                                        <input type="number" min="0" name="total_price" class="form-control TotalPrice" value="{{$booking->total}}" placeholder="{{__("Tour Price")}}" readonly>
+                                                    </div>
+                                                </div>
+                                                <?php
+                                                    $total_sale_price = $booking->total;
+                                                    if (!empty($booking->proposal_discount)) {
+                                                        if ($booking->proposal_discount < 0) {
+                                                            $total_sale_price = $booking->total - abs($booking->proposal_discount);
+                                                        }else{
+                                                            $total_sale_price = $booking->total + abs($booking->proposal_discount);
+                                                        }
+                                                    }
+                                                 ?>
+                                                <div class="col-lg-4">
+                                                    <div class="form-group">
+                                                        <label class="control-label">{{__("Discount")}}</label>
+                                                        <input type="number" name="discount" class="form-control vendorProposalDis" value="{{ $booking->proposal_discount }}" placeholder="{{__("Extra Discount")}}">
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4">
+                                                    <div class="form-group">
+                                                        <label class="control-label">{{__("Total Proposal Price")}}</label>
+                                                        <input type="text" name="total_tour_price" class="form-control proposalSalePrice" value="{{round($total_sale_price)}}" placeholder="{{__("Tour Sale Price")}}" readonly="">
+                                                    </div>
+                                                </div>
+                                                <?php $admin_remark = $booking->getMeta('admin_remark') ?>
+                                                <div class="col-lg-12">
+                                                    <div class="form-group">
+                                                        <label class="control-label">{{__("Remark")}}</label>
+                                                        <textarea name="admin_remark" class="form-control full-h" placeholder="...">{{$admin_remark}}</textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-12">
+                                                    <span>
+                                                        {{__("If the regular price is less than the discount , it will show the regular price")}}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
             						<div class="panel">
             						    <div class="panel-title"><strong>Welcome Note</strong></div>
             						    <div class="panel-body">
@@ -389,7 +778,7 @@ button, input, optgroup, select, textarea {
             						        </div>
             						    </div>
             						</div>
-                        <div class="panel">
+                                    <div class="panel">
             						    <div class="panel-title"><strong>Other/Visa Information</strong></div>
             						    <div class="panel-body">
             						        <div class="form-group">
@@ -414,250 +803,6 @@ button, input, optgroup, select, textarea {
             						    </div>
             						</div>
             					@endif
-                    </div>
-                    <div id="second-section">
-                        <div class="panel">
-                          <?php $totalSalePrice = 0; ?>
-                          <div class="panel-title"><strong>Guests</strong></div>
-                          <div class="panel-body">
-
-                            <div class="form-group-item">
-                                <label class="control-label">{{__('Person Types')}}</label>
-                                <div class="g-items-header">
-                                    <div class="row">
-                                        <div class="col-md-5">{{__("Person Type")}}</div>
-                                        <div class="col-md-4">{{__('Number of Person')}}</div>
-                                        <div class="col-md-3">{{__('Price')}}</div>
-                                    </div>
-                                </div>
-                                <?php
-                                $total_guests = 0;
-                                $default_guests = array(
-                                  array("name" => "Adult","number" => null),
-                                  array("name" => "Child","number" => null),
-                                  array("name" => "Kid","number" => null)
-                                );
-                                  if (!empty($row->person_types)) {
-                                    $enquiry->person_types = $row->person_types;
-                                  }elseif (empty($enquiry->person_types)) {
-                                    $enquiry->person_types = $default_guests;
-                                  }
-                                  $tour_person_types = isset($tour->meta->person_types) ? $tour->meta->person_types : array();
-                                ?>
-                                <div class="g-items PersonTypes">
-                                    @if(!empty($enquiry->person_types))
-                                        @foreach($enquiry->person_types as $key=>$person_type)
-                                        <?php
-                                        if(empty($person_type['name']) || $person_type['name'] == null){
-                                            $person_type['name'] = $default_guests[$key]['name'];
-                                        }
-                                        if (empty($row->person_types)) {
-                                            $array1 = getArrayByValue($tour_person_types, 'name', $person_type['name']);
-                                            $person_type = array_merge($array1,$person_type);
-                                          }
-                                      $priceOnePerson = ($person_type['price']);
-
-                                          $person = isset($person_type['number']) ? $person_type['number'] : 0;
-                                          $totalPersonPrice = ($person_type['price'] * $person);
-                                          $totalSalePrice += $totalPersonPrice;
-                                          if ($person_type['price'] <= 0) {
-                                            $totalPersonPrice = 0;
-                                         }
-                                         $total_guests += $person;
-                                        ?>
-                                            <div class="item">
-                                                <div class="row">
-                                                    <div class="col-md-5">
-                                                        <input type="text" name="person_types[{{$key}}][name]" class="form-control" value="{{$person_type['name'] ?? ''}}" placeholder="{{__('Eg: Adults')}}" readonly>
-                                                        <input type="hidden" name="person_types[{{$key}}][desc]" class="form-control" value="{{$person_type['desc'] ?? ''}}" placeholder="{{__('Description')}}" readonly>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                      <input type="hidden" min="0" name="person_types[{{$key}}][min]" class="form-control" value="{{$person_type['min'] ?? 0}}" placeholder="{{__("Minimum per booking")}}">
-                                                      <input type="hidden" min="0" name="person_types[{{$key}}][max]" class="form-control" value="{{$person_type['max'] ?? 0}}" placeholder="{{__("Maximum per booking")}}">
-
-
-                                                      <input type="number" min="0" name="person_types[{{$key}}][number]" class="form-control bookingProposalGuest" value="{{isset($person_type['number']) ? $person_type['number'] : 0}}" placeholder="{{__("Number of Person")}}">
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <input type="hidden" min="0" name="person_types[{{$key}}][price]" class="form-control priceOnePerson" value="{{$priceOnePerson ?? 0}}" placeholder="{{__("per 1 item")}}" readonly>
-                                    
-                                                        <input type="text" min="0" name="person_types[{{$key}}][total_price]" class="form-control totalPrice" value="{{$totalPersonPrice ?? 0}}" placeholder="{{__("per 1 item")}}" readonly>
-                        
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    @endif
-                                </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="panel">
-                          <div class="panel-title"><strong>Extra Price</strong></div>
-                          <div class="panel-body">
-                            <div class="form-group-item">
-                                <label class="control-label">{{__('Extra Price')}}</label>
-                                <div class="g-items-header">
-                                    <div class="row">
-                                        <div class="col-md-1">#</div>
-                                        <div class="col-md-6">{{__("Name")}}</div>
-                                        <div class="col-md-5">{{__('Price')}}</div>
-                                    </div>
-                                </div>
-                                <?php
-                                $extra_price1 = 0;
-                                  if (!empty($row->extra_price)) {
-                                    $extra_prices = $row->extra_price;
-                                  }else {
-                                    $extra_prices = isset($tour->meta->extra_price) ? $tour->meta->extra_price : array();
-                                  }
-                                ?>
-                                <div class="g-items">
-                                    @if(!empty($extra_prices))
-                                        @foreach($extra_prices as $key=>$extra_price)
-                                          <?php
-                                            $extra_price1 += isset($extra_price['enable']) ? $extra_price['price'] : 0;
-                                            $totalSalePrice += $extra_price1;
-                                          ?>
-                                            <div class="item extra_price_item" data-number="{{$key}}">
-                                                <div class="row">
-                                                  <div class="col-md-1">
-                                                    <div class="form-group">
-                                                        <label><input type="checkbox" class="bookingProposalExtra" name="extra_price[{{$key}}][enable]" value="1" {{isset($extra_price['enable']) ? 'checked' : ''}}></label>
-                                                    </div>
-                                                  </div>
-                                                    <div class="col-md-5">
-                                                        <input type="text" name="extra_price[{{$key}}][name]" class="form-control" value="{{$extra_price['name'] ?? ''}}" placeholder="{{__('Extra price name')}}" readonly>
-                                                        <input type="hidden" name="extra_price[{{$key}}][type]" class="form-control" value="{{$extra_price['type'] ?? ''}}" readonly>
-                                                    </div>
-                                                    <div class="col-md-3">
-                                                        <input type="hidden" min="0" name="extra_price[{{$key}}][price]" class="form-control" value="{{$extra_price['price']}}" readonly>
-                                                        <input type="text" min="0" name="extra_price[{{$key}}][total]" class="form-control totalPrice" value="{{$extra_price['price']}}" readonly>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    @endif
-                                </div>
-                            </div>
-                          </div>
-                      </div>
-                      <div class="panel">
-                          <div class="panel-title"><strong>Discount by number of people</strong></div>
-                          <div class="panel-body">
-                            <div class="form-group-item">
-                                <div class="g-items-header">
-                                    <div class="row">
-                                        <div class="col-md-4">No of people</div>
-                                        <div class="col-md-3">Discount</div>
-                                        <div class="col-md-3">Type</div>
-                                        <div class="col-md-1"></div>
-                                    </div>
-                                </div>
-                                <?php
-                                  if (!empty($row->discount_by_people)) {
-                                    $discount_by_people = $row->discount_by_people;
-                                  }else {
-                                    $discount_by_people = isset($tour->meta->discount_by_people) ? $tour->meta->discount_by_people : array();
-                                  }
-                                  $total_discount_by_people = 0;
-                                  $transfers_price = $custom_tour['transfers_price'] * $total_guests;
-                                  if ($discount_by_people and !empty($discount_by_people)) {
-                                        foreach ($discount_by_people as $type) {
-                                            if ($type['from'] <= $total_guests and (!$type['to'] or $type['to'] >= $total_guests)) {
-
-                                                $type_total = 0;
-                                                switch ($type['type']) {
-                                                    case "fixed":
-                                                        $type_total = $type['amount'];
-                                                        break;
-                                                    case "percent":
-                                                        $type_total = $transfers_price / 100 * $type['amount'];
-                                                        break;
-                                                }
-                                                $totalSalePrice -= $type_total;
-                                                $total_discount_by_people += $type_total;
-                                            }
-                                        }
-                                    }
-                                ?>
-                                <div class="g-items">
-                                @if(!empty($discount_by_people))
-                                    @foreach($discount_by_people as $key=>$discount)
-                                    <div class="item" data-number="0">
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <input type="number" min="0" name="discount_by_people[{{$key}}][from]" class="form-control" value="{{$discount['from'] ?? ''}}" placeholder="From" readonly />
-                                            </div>
-                                            <div class="col-md-2">
-                                                <input type="number" min="0" name="discount_by_people[{{$key}}][to]" class="form-control" value="{{$discount['to'] ?? ''}}" placeholder="To" readonly />
-                                            </div>
-                                            <div class="col-md-3">
-                                                <input type="number" min="0" name="discount_by_people[{{$key}}][amount]" class="form-control" value="{{$discount['amount'] ?? ''}}" readonly />
-                                            </div>
-                                            <div class="col-md-3">
-                                                <input type="text" name="discount_by_people[{{$key}}][type]" class="form-control" value="{{$discount['type'] ?? ''}}" readonly />
-                                            </div>
-                                            <div class="col-md-1">
-                                                
-                                            </div>
-                                        </div>
-                                    </div>
-                                    @endforeach
-                                    @endif
-                                </div>
-                            </div>
-                          </div>
-                      </div>
-                      <div class="panel">
-          						    <div class="panel-title"><strong>Tour Price</strong></div>
-          						    <div class="panel-body">
-                            <div class="row TotalPriceSection">
-                                <div class="col-lg-3">
-                                    <div class="form-group">
-                                        <label class="control-label">{{__("Total Price")}}</label>
-                                        <input type="number" min="0" name="total_price" class="form-control TotalPrice" value="{{$totalSalePrice}}" placeholder="{{__("Tour Price")}}" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-lg-3">
-                                    <div class="form-group">
-                                        <label class="control-label">{{__("Total Extra Price")}}</label>
-                                        <input type="text" name="total_extra_price" class="form-control TotalExtraPrice" value="{{$extra_price1}}" placeholder="{{__("Extra Price Price")}}" readonly="">
-                                    </div>
-                                </div>
-                                <div class="col-lg-3">
-                                    <div class="form-group">
-                                        <label class="control-label">{{__("Discount by people")}}</label>
-                                        <input type="text" name="total_discount_by_people" class="form-control DiscountByPeople" value="{{$total_discount_by_people}}" placeholder="{{__("discount_by_people")}}" readonly="">
-                                    </div>
-                                </div>
-                                <div class="col-lg-3">
-                                    <div class="form-group">
-                                        <label class="control-label">{{__("Discount")}}</label>
-                                        <input type="number" name="discount" class="form-control PraposalDiscount" value="{{$row->discount}}" placeholder="{{__("Extra Discount")}}">
-                                    </div>
-                                </div>
-                                <?php
-                                if ($row->discount > 0) {
-                                  $totalSalePrice += abs($row->discount);
-                                }else {
-                                  $totalSalePrice -= abs($row->discount);
-                                }
-                                ?>
-                                <div class="col-lg-3">
-                                    <div class="form-group">
-                                        <label class="control-label">{{__("Total Sale Price")}}</label>
-                                        <input type="text" name="total_tour_price" class="form-control proposalSalePrice" value="{{$totalSalePrice}}" placeholder="{{__("Tour Sale Price")}}" readonly="">
-                                    </div>
-                                </div>
-                                <div class="col-lg-12">
-                                    <span>
-                                        {{__("If the regular price is less than the discount , it will show the regular price")}}
-                                    </span>
-                                </div>
-                            </div>
-          						    </div>
-          				</div>
                     </div>
                     </div>
                     <div class="col-md-3">

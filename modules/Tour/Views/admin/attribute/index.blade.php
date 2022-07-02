@@ -61,13 +61,13 @@
                                         <tr>
                                             <td><input type="checkbox" class="check-item" name="ids[]" value="{{$row->id}}"></td>
                                             <td class="title">
-                                                <a href="{{route('tour.admin.attribute.edit', ['id' => $row->id]) }}">{{$row->name}}</a>
+                                                <a href="{{route('tour.admin.attribute.edit', ['id' => $row->id]) }}">{{@$row->name}}</a>
                                             </td>
                                             <td>
                                                 {{ !empty($row->type) ?  getAttrTypes($row->type) : '' }}
                                             </td>
                                             <td>
-                                                {{ !empty($row->location) ?  getLocationById($row->location)->name : '' }}
+                                                {{ !empty($row->location) ?  @getLocationById($row->location)->name : '' }}
                                             </td>
                                             <td>
                                                 <a href="{{route('tour.admin.attribute.edit', ['id' => $row->id]) }}" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i> {{__('Edit')}}

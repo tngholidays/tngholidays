@@ -24,6 +24,7 @@ Route::group(['prefix'=>'attribute'],function(){
 
 
     Route::get('/terms/{attr_id}','AttributeController@terms')->name('tour.admin.attribute.term.index');
+    Route::get('/add-term/{attr_id}','AttributeController@addTerm')->name('tour.admin.attribute.term.addTerm');
     Route::get('/term_edit/{id}','AttributeController@term_edit')->name('tour.admin.attribute.term.edit');
     Route::post('/term_store/{id}','AttributeController@term_store')->name('tour.admin.attribute.term.store');
     Route::post('/editTermBulk','AttributeController@editTermBulk')->name('tour.admin.attribute.term.editTermBulk');

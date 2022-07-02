@@ -76,6 +76,17 @@ class EnquiryController extends AdminController
             unset($data['extra_price']);
             $row->fill($data);
             $row->save();
+            $tour = $this->tourClass::find($data['tour_id']);
+
+            if (!empty($tour)) {
+                $params = array(
+                                'start_date'=>$data['start_date'],
+                                'end_date'=>$data['start_date'],
+                                'type'=>'add_by_admin',
+                                'enquiry_id'=>$row->enquiry_id
+                               );
+                return redirect()->to($tour->getDetailUrlEditMode($params));
+            }
 
             if ($row) {
                 if ($id > 0) {
@@ -236,6 +247,7 @@ class EnquiryController extends AdminController
      public function booking_proposal(Request $request, $id, $tour_id=null)
     {
             $enquiry = $this->enquiryClass::where("id", $id)->first();
+            $booking = Booking::find($enquiry->booking_id);
             $row = BookingProposal::where("enquiry_id", $enquiry->id)->first();
             $destination_id = !empty($row->destination) ? $row->destination : $enquiry->destination;
             $attributesIds = [];
@@ -248,16 +260,17 @@ class EnquiryController extends AdminController
             }
             $old_row = $row;
             $customTour = $row->tour_details;
-            $tour = margeCustomTour($tour_id, $customTour);
+            $tour = $this->tourClass::find($tour_id);
             $data = [
                 'row'               => $row,
-                'old_row'               => $old_row,
-                'custom_tour'               => $customTour,
+                'old_row'           => $old_row,
+                'custom_tour'       => $customTour,
                 'enquiry'           => $enquiry,
                 'tour'              => $tour,
+                'booking'           => $booking,
                 'step'              => '',
                 'attributesIds'     => array_unique($attributesIds),
-                'page_title'            => __("Booking Proposal "),
+                'page_title'        => __("Booking Proposal "),
                 'breadcrumbs'       => [
                     [
                         'name' => __('Report'),
@@ -281,17 +294,6 @@ class EnquiryController extends AdminController
             $data = $request->input();
             if ($id > 0) {
                 $row = BookingProposal::find($id);
-                if ($data['old_tour_id'] != $data['tour_id']) {
-                  if (isset($data['start_date'])) {
-                    $data['start_date'] = str_replace("/", "-", $data['start_date']);
-                  }
-                  $row->destination = $data['destination'];
-                  $row->duration = $data['duration'];
-                  $row->start_date = $data['start_date'];
-                  $row->save();
-                   $this->enquiryClass::where("id", $row->enquiry_id)->update(['object_id'=>$data['tour_id']]);
-                  return redirect(route('report.booking.booking_proposal', ['id'=>$row->enquiry_id,'tour_id'=>$data['tour_id']]));
-                }
                 if (empty($row)) {
                     return redirect(route('tour.admin.index'));
                 }
@@ -303,16 +305,11 @@ class EnquiryController extends AdminController
                 $row = new BookingProposal();
                 $row->status = "publish";
             }
-
-
             if (isset($data['start_date'])) {
               $data['start_date'] = str_replace("/", "-", $data['start_date']);
             }
-            $data['tour_details'] = $row->tour_details;
-            $data['default_hotels'] = $row->default_hotels;
             $row->fill($data);
             $row->save();
-
             if ($row) {
                 if ($id > 0) {
                     // event(new UpdatedServiceEvent($row));
@@ -331,17 +328,19 @@ class EnquiryController extends AdminController
 
            $row = BookingProposal::where("enquiry_id", $id)->first();
            $customTour = $row->tour_details;
-            
-           $tour = margeCustomTour($row->tour_id, $customTour);
-           $attributes = \Modules\Core\Models\Terms::getTermsById($customTour['terms']);
+           
+           $tour = $this->tourClass::find($row->tour_id);
+           $booking = Booking::find($enquiry->booking_id);
+           $attributes = \Modules\Core\Models\Terms::getTermsById($booking->tour_attributes);
 
            $data = [
                'row'               => $row,
                'enquiry'           => $enquiry,
-               'terms'             => $customTour['terms'],
-               'attributes'             => $attributes,
+               'terms'             => $attributes,
+               'attributes'        => $attributes,
                'tour'              => $tour,
-               'page_title'            => __("Booking Proposal "),
+               'booking'           => $booking,
+               'page_title'        => __("Booking Proposal "),
                'breadcrumbs'       => [
                    [
                        'name' => __('Report'),

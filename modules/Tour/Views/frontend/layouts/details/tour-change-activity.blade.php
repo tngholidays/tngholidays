@@ -14,6 +14,7 @@
                 <?php 
                   $img = get_file_url($term->image_id,'thumb'); 
                   $term['img_url'] = $img;
+                  $term['attr_type'] = $term->attribute->type;
                 ?>
                     <li class="appendRight20 relative">
                         <div class="altAcc"><span class="altAccoContainer">Acivity</span></div>
@@ -28,7 +29,7 @@
 
                         <div class="makeFlex">
                             <input type="hidden" class="json_input" value="{{json_encode($term)}}">
-                            <p class="font12">{{$price}}</p>
+                            <p class="font12" style="display: none;">{{$price}}</p>
                             <a href="javascript:void(0);" class="font12 changeActivity" data-price="{{$price}}" data-timezone="{{$term->time_zone}}" data-index="{{$index}}">Add Now</a>
                         </div>
                     </li>

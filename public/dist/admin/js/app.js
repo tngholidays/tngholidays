@@ -2116,6 +2116,7 @@ __webpack_require__.r(__webpack_exports__);
 
         var transferPrice = $(this).attr('transfer')||0;
         totalTransfer += parseFloat(transferPrice);
+
       }
     });
     // var price = $(this).attr('price')||0;
@@ -2379,6 +2380,17 @@ jQuery(document).on("change", ".bookingProposalExtra", function (e, params) {
 });
 jQuery(document).on("keyup change", ".PraposalDiscount", function (e, params) {
   proposalTourCost();
+});
+jQuery(document).on("keyup change", ".vendorProposalDis", function (e, params) {
+  var thisPrice = this.value;
+  var TotalPrice = $('.TotalPriceSection .TotalPrice').val()||0;
+  if (thisPrice > 0) {
+    var sale_price = parseFloat(TotalPrice) + parseFloat(Math.abs(thisPrice));
+  }else {
+    var sale_price = parseFloat(TotalPrice) - parseFloat(Math.abs(thisPrice));
+  }
+  $('.TotalPriceSection .proposalSalePrice').val(sale_price);
+
 });
 function proposalTourCost() {
   var totalGuestPrice = 0;
