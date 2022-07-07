@@ -291,6 +291,25 @@
 
             return view('Tour::frontend.layouts.details.tour-change-activity', compact('termss','index'));
         }
+        public function getTourMeals(Request $request)
+        {
+            $data = $request->all();
+            $term = null;
+            $duration = 0;
+            $evening = 0;
+            $query = Terms::whereNull('hide_in_single')->whereHas('attribute', function($q) use($request){ 
+                $q->where('type',3)
+                 ->where('location',$request->location_id);
+            });
+            if (isset($request->all_ids)) {
+               $query->whereNotIn('id', $request->all_ids);
+            }
+
+            $termss = $query->get();
+            $index = $data['index'];
+            $attr_title = isset($termss[0]) ? $termss[0]->attribute->name : null ;
+            return view('Tour::frontend.layouts.details.tour-change-meal', compact('termss','index','attr_title'));
+        }
         public function applyCouponCode(Request $request)
         {
             $data = $request->all();

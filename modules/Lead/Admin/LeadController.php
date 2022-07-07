@@ -324,7 +324,27 @@ class LeadController extends AdminController
                 
                 if($data['type'] == 2 && !empty($lead->phone)){
                     $to = (string)PhoneNumber::make($lead->phone)->ofCountry('IN');
-                    Sms::to($to)->content($data['content'])->send();
+                    $fileName = "";
+                    if($request->hasFile('file')) {
+                        $file = $request->file('file');
+                        $destinationPath = 'public/uploads/booking_docs/';
+                        $fullName = str_replace(" ","",$file->getClientOriginalName());
+                        $onlyName = explode('.',$fullName);
+                        if(is_array($onlyName)){
+                          $fileName = $onlyName[0].time().".".$onlyName[1];
+                        }
+                        else{
+                          $fileName = $onlyName.time();
+                        }
+                        $file->move(public_path().'/uploads/booking_docs/', $fileName); 
+                        $path = asset($destinationPath.$fileName);
+                    }
+                    if (!empty($fileName)) {
+                        Sms::to($to)->content($data['content'])->file($path)->send();
+                    }else{
+                        Sms::to($to)->content($data['content'])->send();
+                    }
+                    
                 }
                 
 
@@ -425,6 +445,7 @@ class LeadController extends AdminController
         $search = $request->query('search');
         $date_type = $request->query('date_type');
         $from_date = $request->query('from_date');
+        $labels = $request->query('labels');
         $to_date = $request->query('to_date');
         $destination = $request->query('destination');
         $duration = $request->query('duration');
@@ -448,6 +469,7 @@ class LeadController extends AdminController
         $q5 = Enquiry::with('AssignUser')->select('id','phone','labels','name','email','destination','approx_date','assign_to','created_at','updated_at')->where('status', '=', 'completed');
         $q6 = Enquiry::with('AssignUser')->select('id','phone','labels','name','email','destination','approx_date','assign_to','created_at','updated_at')->where('status', '=', 'payment_done');
         $q7 = Enquiry::with('AssignUser')->select('id','phone','labels','name','email','destination','approx_date','assign_to','created_at','updated_at')->where('status', '=', 'cancel');
+        $q8 = Enquiry::with('AssignUser')->select('id','phone','labels','name','email','destination','approx_date','assign_to','created_at','updated_at')->where('status', '=', 'notinterested');
         if (!empty($status)) {
             $q1->where('status', $status);
             $q2->where('status', $status);
@@ -456,6 +478,17 @@ class LeadController extends AdminController
             $q5->where('status', $status);
             $q6->where('status', $status);
             $q7->where('status', $status);
+            $q8->where('status', $status);
+        }
+        if (!empty($labels)) {
+            $q1->where('labels', 'LIKE', '%'.$labels.'%');
+            $q2->where('labels', 'LIKE', '%'.$labels.'%');
+            $q3->where('labels', 'LIKE', '%'.$labels.'%');
+            $q4->where('labels', 'LIKE', '%'.$labels.'%');
+            $q5->where('labels', 'LIKE', '%'.$labels.'%');
+            $q6->where('labels', 'LIKE', '%'.$labels.'%');
+            $q7->where('labels', 'LIKE', '%'.$labels.'%');
+            $q8->where('labels', 'LIKE', '%'.$labels.'%');
         }
         if (!empty($search)) {
             if(is_numeric($search)){
@@ -467,6 +500,7 @@ class LeadController extends AdminController
                 $q5->where('phone', 'LIKE', '%'.$search);
                 $q6->where('phone', 'LIKE', '%'.$search);
                 $q7->where('phone', 'LIKE', '%'.$search);
+                $q8->where('phone', 'LIKE', '%'.$search);
             }else{
                 $q1->where('name', 'LIKE', '%'.$search.'%');
                 $q2->where('name', 'LIKE', '%'.$search.'%');
@@ -475,6 +509,7 @@ class LeadController extends AdminController
                 $q5->where('name', 'LIKE', '%'.$search.'%');
                 $q6->where('name', 'LIKE', '%'.$search.'%');
                 $q7->where('name', 'LIKE', '%'.$search.'%');
+                $q8->where('name', 'LIKE', '%'.$search.'%');
             }
         }
         if (!empty($from_date) && $date_type == 1) {
@@ -488,6 +523,7 @@ class LeadController extends AdminController
             $q5->whereDate('created_at','>=', $from_date);
             $q6->whereDate('created_at','>=', $from_date);
             $q7->whereDate('created_at','>=', $from_date);
+            $q8->whereDate('created_at','>=', $from_date);
         }
         if (!empty($to_date) && $date_type == 1) {
             $to_date = str_replace("/", "-", $to_date);
@@ -500,6 +536,7 @@ class LeadController extends AdminController
             $q5->whereDate('created_at','<=', $to_date);
             $q6->whereDate('created_at','<=', $to_date);
             $q7->whereDate('created_at','<=', $to_date);
+            $q8->whereDate('created_at','<=', $to_date);
             
         }
         if (!empty($from_date) && $date_type == 2) {
@@ -513,6 +550,7 @@ class LeadController extends AdminController
             $q5->Where(DB::raw("STR_TO_DATE(approx_date,'%d/%m/%Y')"),'>=', $from_date);
             $q6->Where(DB::raw("STR_TO_DATE(approx_date,'%d/%m/%Y')"),'>=', $from_date);
             $q7->Where(DB::raw("STR_TO_DATE(approx_date,'%d/%m/%Y')"),'>=', $from_date);
+            $q8->Where(DB::raw("STR_TO_DATE(approx_date,'%d/%m/%Y')"),'>=', $from_date);
         }
         if (!empty($to_date) && $date_type == 2) {
             $to_date = str_replace("/", "-", $to_date);
@@ -525,6 +563,7 @@ class LeadController extends AdminController
             $q5->Where(DB::raw("STR_TO_DATE(approx_date,'%d/%m/%Y')"),'<=', $to_date);
             $q6->Where(DB::raw("STR_TO_DATE(approx_date,'%d/%m/%Y')"),'<=', $to_date);
             $q7->Where(DB::raw("STR_TO_DATE(approx_date,'%d/%m/%Y')"),'<=', $to_date);
+            $q8->Where(DB::raw("STR_TO_DATE(approx_date,'%d/%m/%Y')"),'<=', $to_date);
  
             
         }
@@ -537,6 +576,7 @@ class LeadController extends AdminController
             $q5->Where('destination', $destination);
             $q6->Where('destination', $destination);
             $q7->Where('destination', $destination);
+            $q8->Where('destination', $destination);
             
         }
         if (!empty($duration)) {
@@ -547,6 +587,7 @@ class LeadController extends AdminController
             $q5->Where('duration', $duration);
             $q6->Where('duration', $duration);
             $q7->Where('duration', $duration);
+            $q8->Where('duration', $duration);
             
         }
         if (!empty($staffuser)) {
@@ -557,6 +598,7 @@ class LeadController extends AdminController
             $q5->Where('update_user', $staffuser);
             $q6->Where('update_user', $staffuser);
             $q7->Where('update_user', $staffuser);
+            $q8->Where('update_user', $staffuser);
             
         }
         
@@ -567,13 +609,15 @@ class LeadController extends AdminController
         $complete_leads = $q5->orderBy('updated_at', 'desc')->get();
         $payment_done = $q6->orderBy('updated_at', 'desc')->get();
         $cancel_leads = $q7->orderBy('updated_at', 'desc')->get();
+        $notinterested = $q8->orderBy('updated_at', 'desc')->get();
         $ary1 = $new_leads->pluck('phone')->toArray();
         $ary2 = $processing->pluck('phone')->toArray();
         $ary3 = $interested->pluck('phone')->toArray();
         $ary4 = $quotation_send->pluck('phone')->toArray();
         $ary5 = $complete_leads->pluck('phone')->toArray();
         $ary6 = $payment_done->pluck('phone')->toArray();
-        $mobile_nos = array_unique(array_merge($ary1,$ary2,$ary3,$ary4,$ary5,$ary6));
+        $ary7 = $notinterested->pluck('phone')->toArray();
+        $mobile_nos = array_unique(array_merge($ary1,$ary2,$ary3,$ary4,$ary5,$ary6,$ary7));
         $locations = Location::select('id', 'name')->where("status","publish")->orderBy('id', 'desc')->get();
         $terms = Terms::select('id', 'name')->where("attr_id", 12)->orderBy('id', 'ASC')->get();
         $users = User::query()->orderBy('id','desc')->role('staff')->get();
@@ -607,6 +651,28 @@ class LeadController extends AdminController
               );
             }
             foreach($processing as $row1)
+           {
+               $dataArray[] = array(
+               (!empty($row1->name) ? $row1->name : ''),
+               (!empty($row1->email) ? $row1->email : ''),
+               (!empty($row1->phone) ? $row1->phone : ''),
+               (!empty($row1->city) ? $row1->city : ''),
+               (!empty($row1->num_of_person) ? $row1->num_of_person : ''),
+               (isset($row1->destination) ? @getLocationById(@$row1->destination)->name : ''),
+               (isset($row1->duration) ? @getDurationById(@$row1->duration)->name : ''),
+               (isset($row1->person_types[0]['name']) ? $row1->person_types[0]['number'] : ''),
+               (isset($row1->person_types[1]['name']) ? $row1->person_types[1]['number'] : ''),
+               (isset($row1->person_types[2]['name']) ? $row1->person_types[2]['number'] : ''),
+               (isset($row1->approx_date) ? $row1->approx_date : '-'),
+               (!empty($row1->status) ? $row1->status : ''),
+               $row1->source,
+               ((!empty($row1->update_user) && $row1->update_user != 1) ? @$row1->UpdateUser->first_name.' '.@$row1->UpdateUser->last_name : 'TNGHOLIDAYS'),
+               $row1->getLastUserActivity(),
+               $row1->created_at,
+               $row1->updated_at,
+              );
+            }
+            foreach($notinterested as $row1)
            {
                $dataArray[] = array(
                (!empty($row1->name) ? $row1->name : ''),
@@ -748,6 +814,7 @@ class LeadController extends AdminController
             'new_leads'        => $new_leads,
             'processing'        => $processing,
             'interested'        => $interested,
+            'notinterested'        => $notinterested,
             'quotation_send'        => $quotation_send,
             'complete_leads'        => $complete_leads,
             'payment_done'        => $payment_done,

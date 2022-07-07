@@ -304,11 +304,11 @@ table.dataTable thead>tr>th {
                                     }elseif($lbl == 5){
                                         $lbl5 = true;
                                     }elseif($lbl == 6){
-                                        $lbl5 = true;
+                                        $lbl6 = true;
                                     }elseif($lbl == 7){
-                                        $lbl5 = true;
+                                        $lbl7 = true;
                                     }elseif($lbl == 8){
-                                        $lbl5 = true;
+                                        $lbl8 = true;
                                     }
                                 }
                             }
@@ -521,6 +521,10 @@ table.dataTable thead>tr>th {
                                     <label class="control-label">Message</label>
                                     <textarea name="content" rows="3" class="form-control" placeholder="Write here..."></textarea>
                                     <span class="help-block"></span>
+                                </div>
+                                <div class="form-group custom-file mb-3">
+                                    <input type="file" class="custom-file-input" id="customFile" name="file">
+                                    <label class="custom-file-label" for="customFile">Choose file</label>
                                 </div>
                                 <div class="responseMSG"></div>
                                 <div class="text-right">

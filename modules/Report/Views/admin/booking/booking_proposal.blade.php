@@ -160,9 +160,9 @@ button, input, optgroup, select, textarea {
         <div class="container-fluid">
             <div class="d-flex justify-content-between mb20">
                 <div class="">
-                    <h1 class="title-bar">{{$row->id ? __('Booking Praposal: ').$row->title : __('Booking Praposal')}}</h1>
+                    <h1 class="title-bar">{{$row->id ? __('Booking Praposal: ').$row->title : __('Booking Proposal')}}</h1>
                 </div>
-                @if(!empty($row->tour_details))
+                @if(!empty($row))
                     <a class="btn btn-primary btn-sm" href="{{url('admin/module/report/booking/view_proposal/'.$enquiry->id)}}" target="_blank">{{__("View Praposal")}}</a>
                 @endif
             </div>
@@ -174,37 +174,37 @@ button, input, optgroup, select, textarea {
                   <!-- Step First Start -->
                     <div id="first-section">
                         <div class="panel" style="pointer-events: none;">
-                        						    <div class="panel-title"><strong>Basic Info</strong></div>
-                        						    <div class="panel-body">
-                         						        <!-- <div class="form-group">
-                        						            <label>Title</label>
-                        						            <input type="text" value="" placeholder="Tour title" name="title" class="form-control" />
-                        						        </div>  -->
-                        						        <div class="row">
-                        								    <div class="col-lg-4">
-                        								        <div class="form-group">
-                        								            <label class="control-label">Name</label>
+                                                    <div class="panel-title"><strong>Basic Info</strong></div>
+                                                    <div class="panel-body">
+                                                        <!-- <div class="form-group">
+                                                            <label>Title</label>
+                                                            <input type="text" value="" placeholder="Tour title" name="title" class="form-control" />
+                                                        </div>  -->
+                                                        <div class="row">
+                                                            <div class="col-lg-4">
+                                                                <div class="form-group">
+                                                                    <label class="control-label">Name</label>
                                                     <?php $name = !empty($old_row->name) ? $old_row->name : $enquiry->name; ?>
-                        								            <input type="text" name="name" class="form-control" value="{{$name}}" placeholder="Name" />
-                        								        </div>
-                        								    </div>
-                        								    <div class="col-lg-4">
-                        								        <div class="form-group">
-                        								            <label class="control-label">Destinations</label>
-                        								            <?php
-                        								            	$locations = getLocations();
-                        								            	$destination_id = !empty($old_row->destination) ? $old_row->destination : $enquiry->destination;
-                        								            ?>
-                        								            <select class="form-control DestinationChange" name="destination" required>
-                        									            <option value="">Select Hotel</option>
-                        												@if(count($locations) > 0)
-                        			                                        @foreach($locations as $location )
-                        			                                            <option value="{{$location->id}}" {{$destination_id==$location->id ? 'selected' : ''}}>{{$location->name}}</option>
-                        			                                        @endforeach
-                        			                                    @endif
-                        									        </select>
-                        								        </div>
-                        								    </div>
+                                                                    <input type="text" name="name" class="form-control" value="{{$name}}" placeholder="Name" />
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-4">
+                                                                <div class="form-group">
+                                                                    <label class="control-label">Destinations</label>
+                                                                    <?php
+                                                                        $locations = getLocations();
+                                                                        $destination_id = !empty($old_row->destination) ? $old_row->destination : $enquiry->destination;
+                                                                    ?>
+                                                                    <select class="form-control DestinationChange" name="destination">
+                                                                        <option value="">Select Hotel</option>
+                                                                        @if(count($locations) > 0)
+                                                                            @foreach($locations as $location )
+                                                                                <option value="{{$location->id}}" {{$destination_id==$location->id ? 'selected' : ''}}>{{$location->name}}</option>
+                                                                            @endforeach
+                                                                        @endif
+                                                                    </select>
+                                                                </div>
+                                                            </div>
                                                             <?php
                                                                 $attributes = getTermsById($attributesIds);
                                                             ?>
@@ -214,7 +214,7 @@ button, input, optgroup, select, textarea {
                                                                     <?php
                                                                         $duration_id = !empty($old_row->duration) ? $old_row->duration : $enquiry->duration;
                                                                     ?>
-                                                                    <select class="form-control DurationChange" name="duration" required>
+                                                                    <select class="form-control DurationChange" name="duration">
                                                                         <option value="">Select Duration</option>
                                                                         @if(isset($attributes[12]) and count($attributes[12]) > 0 && count($attributes[12]['child']) > 0)
                                                                             @foreach($attributes[12]['child'] as $term )
@@ -242,27 +242,27 @@ button, input, optgroup, select, textarea {
                                                                     </select>
                                                                 </div>
                                                             </div>
-                        								    <div class="col-lg-4">
-                        								        <div class="form-group">
-                        								            <label class="control-label">Packages</label>
-                        								            <?php
-                        								            	$tours = getToursByLocation($destination_id);
+                                                            <div class="col-lg-4">
+                                                                <div class="form-group">
+                                                                    <label class="control-label">Packages</label>
+                                                                    <?php
+                                                                        $tours = getToursByLocation($destination_id);
                                                       $tour_id = (!empty($tour->id) ? $tour->id : $enquiry->object_id);
-                        								            ?>
-                        								            <select class="form-control TourChange" name="tour_id" required>
-                        									            <option value="">Select Package</option>
-                        												@if(count($tours) > 0)
-                        			                                        @foreach($tours as $pack )
-                        			                                            <option value="{{$pack->id}}" {{$tour_id==$pack->id ? 'selected' : ''}}>{{$pack->title}}</option>
-                        			                                        @endforeach
-                        			                                    @endif
-                        									        </select>
+                                                                    ?>
+                                                                    <select class="form-control TourChange" name="tour_id">
+                                                                        <option value="">Select Package</option>
+                                                                        @if(count($tours) > 0)
+                                                                            @foreach($tours as $pack )
+                                                                                <option value="{{$pack->id}}" {{$tour_id==$pack->id ? 'selected' : ''}}>{{$pack->title}}</option>
+                                                                            @endforeach
+                                                                        @endif
+                                                                    </select>
                                                   <input type="hidden" name="old_tour_id" value="{{$tour_id}}">
-                        								        </div>
-                        								    </div>
-                        								    <div class="col-lg-4">
-                        								        <div class="form-group">
-                        								            <label class="control-label">Start Date</label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-4">
+                                                                <div class="form-group">
+                                                                    <label class="control-label">Start Date</label>
                                                     <?php
                                                     if (!empty($old_row->start_date)) {
                                                       $start_date = str_replace("-", "/", $old_row->start_date);
@@ -272,17 +272,17 @@ button, input, optgroup, select, textarea {
 
 
                                                     ?>
-                        								            <div class="calDiv">
-                        								                <input type="text" name="start_date" class="form-control datePicker" value="{{$start_date}}" placeholder="Start Date" required />
-                        								                <span><i class="fa fa-calendar" aria-hidden="true"></i></span>
-                        								        	</div>
-                        								    </div>
-                        								</div>
-                        						    </div>
-                        						</div>
-                        					</div>
-            				@if(!empty($tour->id))
-            					    <div class="panel">
+                                                                    <div class="calDiv">
+                                                                        <input type="text" name="start_date" class="form-control datePicker" value="{{$start_date}}" placeholder="Start Date" required />
+                                                                        <span><i class="fa fa-calendar" aria-hidden="true"></i></span>
+                                                                    </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                            @if(!empty($tour->id))
+                                    <div class="panel">
                                         <div class="panel-title"><strong>Day-Wise Itinerary</strong>
                                         <a href="#" class="btn btn-primary"><i class="fa fa-edit"></i> Edit Itinerary</a>
                                         </div>
@@ -440,7 +440,7 @@ button, input, optgroup, select, textarea {
                                                                                 <?php $hotelDDetail = getHotelById($hotel['hotel']); $totalHotelPrice += $hotel['total_price'] ?>
                                                                                     <tr>
                                                                                         <td class="label">{{@getLocationById($hotel['location_id'])->name}}</td>
-                                                                                        <td class="label">{{$hotelDDetail->title}} </td>
+                                                                                        <td class="label">{{@$hotelDDetail->title}} </td>
                                                                                         <td class="label">{{@getRoomsById($hotel['room'])->title}}</td>
                                                                                     </tr>
                                                                                 @endforeach
@@ -730,79 +730,79 @@ button, input, optgroup, select, textarea {
                                             </div>
                                         </div>
                                     </div>
-            						<div class="panel">
-            						    <div class="panel-title"><strong>Welcome Note</strong></div>
-            						    <div class="panel-body">
-            						        <div class="form-group">
-            						            <div class="">
-            						                <textarea name="welcome_note" class="d-none has-ckeditor" cols="30" rows="10">
+                                    <div class="panel">
+                                        <div class="panel-title"><strong>Welcome Note</strong></div>
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <div class="">
+                                                    <textarea name="welcome_note" class="d-none has-ckeditor" cols="30" rows="10">
                                         @if(!empty($row->welcome_note)) {!! $row->welcome_note !!} @else {!! getProposalNote('welcome_note') !!} @endif
                                         </textarea>
-            						            </div>
-            						        </div>
-            						    </div>
-            						</div>
-            						<div class="panel">
-            						    <div class="panel-title"><strong>Term & Condations</strong></div>
-            						    <div class="panel-body">
-            						        <div class="form-group">
-            						            <div class="">
-            						                <textarea name="term_condations" class="d-none has-ckeditor" cols="30" rows="10">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel">
+                                        <div class="panel-title"><strong>Term & Condations</strong></div>
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <div class="">
+                                                    <textarea name="term_condations" class="d-none has-ckeditor" cols="30" rows="10">
                                           @if(!empty($row->term_condations)) {!! $row->term_condations !!} @else {!! getProposalNote('term_condations') !!} @endif
                                         </textarea>
-            						            </div>
-            						        </div>
-            						    </div>
-            						</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                         <div class="panel">
-            						    <div class="panel-title"><strong>Cancellation Note</strong></div>
-            						    <div class="panel-body">
-            						        <div class="form-group">
-            						            <div class="">
-            						                <textarea name="cancellation_note" class="d-none has-ckeditor" cols="30" rows="10">
+                                        <div class="panel-title"><strong>Cancellation Note</strong></div>
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <div class="">
+                                                    <textarea name="cancellation_note" class="d-none has-ckeditor" cols="30" rows="10">
                                           @if(!empty($row->cancellation_note)) {!! $row->cancellation_note !!} @else {!! getProposalNote('cancellation_note') !!} @endif
                                         </textarea>
-            						            </div>
-            						        </div>
-            						    </div>
-            						</div>
-            						<div class="panel">
-            						    <div class="panel-title"><strong>Payment Policy</strong></div>
-            						    <div class="panel-body">
-            						        <div class="form-group">
-            						            <div class="">
-            						                <textarea name="tips" class="d-none has-ckeditor" cols="30" rows="10">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel">
+                                        <div class="panel-title"><strong>Payment Policy</strong></div>
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <div class="">
+                                                    <textarea name="tips" class="d-none has-ckeditor" cols="30" rows="10">
                                           @if(!empty($row->tips)) {!! $row->tips !!} @else {!! getProposalNote('tips') !!} @endif
                                         </textarea>
-            						            </div>
-            						        </div>
-            						    </div>
-            						</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div class="panel">
-            						    <div class="panel-title"><strong>Other/Visa Information</strong></div>
-            						    <div class="panel-body">
-            						        <div class="form-group">
-            						            <div class="">
-            						                <textarea name="other_note" class="d-none has-ckeditor" cols="30" rows="10">
+                                        <div class="panel-title"><strong>Other/Visa Information</strong></div>
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <div class="">
+                                                    <textarea name="other_note" class="d-none has-ckeditor" cols="30" rows="10">
                                           @if(!empty($row->other_note)) {!! $row->other_note !!} @else {!! getProposalNote('other_note') !!} @endif
                                         </textarea>
-            						            </div>
-            						        </div>
-            						    </div>
-            						</div>
-            						<div class="panel">
-            						    <div class="panel-title"><strong>Thanku You Note</strong></div>
-            						    <div class="panel-body">
-            						        <div class="form-group">
-            						            <div class="">
-            						                <textarea name="thankyou_note" class="d-none has-ckeditor" cols="30" rows="10">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="panel">
+                                        <div class="panel-title"><strong>Thanku You Note</strong></div>
+                                        <div class="panel-body">
+                                            <div class="form-group">
+                                                <div class="">
+                                                    <textarea name="thankyou_note" class="d-none has-ckeditor" cols="30" rows="10">
                                           @if(!empty($row->thankyou_note)) {!! $row->thankyou_note !!} @else {!! getProposalNote('thankyou_note') !!} @endif
                                         </textarea>
-            						            </div>
-            						        </div>
-            						    </div>
-            						</div>
-            					@endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                     </div>
                     </div>
                     <div class="col-md-3">
@@ -827,4 +827,227 @@ button, input, optgroup, select, textarea {
             </div>
         </div>
     </form>
+    <div class="modal fade" id="costSummaryModal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="display: initial!important;">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">Cost Summary</h4>
+                </div>
+                <div class="modal-body table-responsive">
+                    <div class="b-table-wrap">
+                        <?php
+                        $totalGuest = $booking->total_guests;
+                        $car = null;
+                        if($booking->total_guests <= 3) {
+                            $car .= "Small";
+                        }
+                        if ($booking->total_guests >= 4 and $booking->total_guests <= 5) {
+                            $car .= "Big";
+                        }
+                        if ($booking->total_guests >= 6 and $booking->total_guests <= 10) {
+                            $car .= "Van";
+                        }
+                        if ($booking->total_guests >= 10 and $booking->total_guests <= 15) {
+                            $car .= "Big Car & Van";
+                        }
+                        if ($booking->total_guests >= 16 and $booking->total_guests <= 20) {
+                            $car .= "Two Van";
+                        }
+                        if ($booking->total_guests >= 20 and $booking->total_guests <= 25) {
+                            $car .= "One Big Car & Two Van";
+                        }
+                        if ($booking->total_guests >= 25 and $booking->total_guests <= 30) {
+                            $car .= "Three Van";
+                        }
+                        ?>
+                        <h4>Required Car Type : {{$car}} - Adults : <strong>{{$booking->total_guests}}</strong></h4>
+                        <table class="b-table table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Activity</th>
+                                    <th>Price</th>
+                                    <th>Price THB</th>
+                                    <th>Per Pax</th>
+                                    <th>Transfer Price</th>
+                                    <th>THB</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $before_sale_price = !empty($booking->getMeta('before_sale_price')) ? $booking->getMeta('before_sale_price') : 0;
+                                    $totalPrice = 0;
+                                    $totalTransPrice = 0;
+
+                                    $totalPriceTHB = 0;
+                                    $totalTransDis = 0;
+                                    $totalTransDisTHB = 0;
+                                    $ii = 1;
+                                    $before_sale_price = ($before_sale_price > $discount_by_peoplePrice) ? $before_sale_price-$discount_by_peoplePrice : $before_sale_price;
+                                ?>
+                                @if(!empty($tour_activities)) 
+                                    @foreach($tour_activities as $key=>$summary)
+
+                                    @if(count($summary['transfer']) > 0)
+                                        @foreach($summary['transfer'] as $keyy => $transfer)
+                                        <?php 
+                                            $transfer_price = $transfer['transfer_price'] ?? 0;
+                                        ?>
+                                        <tr>
+                                            <td>{{$ii}}</td>
+                                            <td>{{$transfer['name'] ?? ""}}</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                             <td>0</td>
+                                            <td>{{$transfer_price}}</td>
+                                            <td>{{($transfer_price > 0) ? $transfer_price/2.5 : 0}}</td>
+                                        </tr>
+                                        <?php 
+                                        $totalTransPrice += $transfer_price;
+                                        $ii++;
+                                        ?>
+                                        @endforeach
+                                    @endif
+
+                                    @if(count($summary['hotel']) > 0)
+                                    <?php  $summary['hotel']['total_price'] = floatval($summary['hotel']['total_room_price']);
+                                        ?>
+                                        <tr>
+                                            <td>{{$ii}}</td>
+                                            <td>{{$summary['hotel']['hotel_name'] ?? ""}} <br> <strong>({{ $summary['hotel']['days']*2 ?? ""}} NIGHT)</strong>, <strong>Room Price {{$summary['hotel']['room_price']/2.5 ?? ""}}</strong>,<br> <strong>Room {{$summary['hotel']['room_name'] ?? ""}}</strong></td>
+                                            <td>{{$summary['hotel']['total_room_price'] ?? ""}}</td>
+                                            <td>{{$summary['hotel']['total_price']/2.5}}</td>
+                                            <td>{{($summary['hotel']['total_price']/2.5)/$booking->total_guests }}</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                        <?php 
+                                        $totalPrice += $summary['hotel']['total_room_price'] ?? 0;
+                                        $totalPriceTHB += $summary['hotel']['total_price']/2.5 ?? 0;;
+                                        $ii++;
+                                        ?>
+                                    @endif
+
+                                    @if(count($summary['morning_activity']) > 0) 
+                                        @foreach($summary['morning_activity'] as $key=>$activity)
+                                        <?php 
+                                            $activity['price'] = isset($activity['price']) ? floatval($activity['price'])*$booking->total_guests : 0;
+                                            $transfer_price = $activity['transfer_price'] ?? 0;
+                                            ?>
+                                        <tr>
+                                            <td>{{$ii}}</td>
+                                            <td>{{$activity['name'] ?? ""}}</td>
+                                            <td>{{$activity['price'] ?? ""}}</td>
+                                            <td>{{$activity['price']/2.5}}</td>
+                                            <td>{{($activity['price']/2.5)/$booking->total_guests }}</td>
+                                            <td>{{$transfer_price}}</td>
+                                            <td>{{($transfer_price > 0) ? $transfer_price/2.5 : 0}}</td>
+                                        </tr>
+                                        <?php 
+                                        $totalPrice += $activity['price'] ?? 0;
+                                        $totalTransPrice += $transfer_price;
+                                        $totalPriceTHB += $activity['price']/2.5 ?? 0;
+                                        $ii++;
+                                        ?>
+                                        @endforeach
+                                    @endif
+
+                                    @if(count($summary['activity']) > 0) 
+                                        @foreach($summary['activity'] as $key=>$activity)
+                                        <?php 
+                                                $activity['price'] = isset($activity['price']) ? floatval($activity['price'])*$booking->total_guests : 0;
+                                                $transfer_price = $activity['transfer_price'] ?? 0;
+                                        ?>
+                                        <tr>
+                                            <td>{{$ii}}</td>
+                                            <td>{{$activity['name'] ?? ""}}</td>
+                                            <td>{{$activity['price'] ?? ""}}</td>
+                                            <td>{{$activity['price']/2.5}}</td>
+                                            <td>{{($activity['price']/2.5)/$booking->total_guests }}</td>
+                                            <td>{{$transfer_price}}</td>
+                                            <td>{{($transfer_price > 0) ? $transfer_price/2.5 : 0}}</td>
+                                        </tr>
+                                        <?php 
+                                        $totalPrice += $activity['price'] ?? 0;
+                                        $totalTransPrice += $transfer_price;
+                                        $totalPriceTHB += $activity['price']/2.5 ?? 0;
+                                        $ii++;
+                                        ?>
+                                        @endforeach
+                                    @endif
+
+                                    @if(count($summary['evening_activity']) > 0) 
+                                        @foreach($summary['evening_activity'] as $key=>$activity)
+                                         <?php 
+                                            $activity['price'] = isset($activity['price']) ? floatval($activity['price'])*$booking->total_guests : 0;
+                                             $transfer_price = $activity['transfer_price'] ?? 0;
+                                             ?>
+                                        <tr>
+                                            <td>{{$ii}}</td>
+                                            <td>{{$activity['name'] ?? ""}}</td>
+                                            <td>{{$activity['price'] ?? ""}}</td>
+                                            <td>{{$activity['price']/2.5}}</td>
+                                            <td>{{($activity['price']/2.5)/$booking->total_guests }}</td>
+                                            <td>{{$transfer_price}}</td>
+                                            <td>{{($transfer_price > 0) ? $transfer_price/2.5 : 0}}</td>
+                                        </tr>
+                                        <?php 
+                                        $totalPrice += $activity['price'] ?? 0;
+                                        $totalTransPrice += $transfer_price;
+                                        $totalPriceTHB += $activity['price']/2.5 ?? 0;
+                                        $ii++;
+                                        ?>
+                                        @endforeach
+                                    @endif
+                                @endforeach @endif
+                                <tr>
+                                    <th colspan="2">
+                                        Sub Total Amount
+                                    </th>
+                                    <th>
+                                        Rs. {{$totalPrice}}
+                                    </th>
+                                    <th>
+                                        TBH. {{$totalPriceTHB}}
+                                    </th>
+                                    <th>
+                                        TBH. {{$totalPriceTHB/$booking->total_guests}}
+                                    </th>
+
+                                    <th>
+                                        Rs. {{$totalTransPrice}}
+                                    </th>
+                                     <th colspan="2">
+                                        TBH. {{$totalTransPrice/2.5}}
+                                    </th>
+                                </tr>
+                                 <tr>
+                                    <th colspan="2">
+                                        Total Amount
+                                    </th>
+                                    <th>
+                                        Total Price {{$totalPrice+$totalTransPrice}}
+                                    </th>
+                                    <th>
+                                        Total Margin {{$before_sale_price}}
+                                    </th>
+                                    <th>
+                                        Total Extra {{$totalExtraPrice}}
+                                    </th>
+                                    <th>
+                                        Total Amount {{($totalPrice+$totalTransPrice)+$before_sale_price+$totalExtraPrice}}
+                                    </th>
+                                    <th colspan="2">
+                                        Total Price TBH {{($totalTransPrice+$totalPriceTHB)/2.5}}
+                                    </th>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

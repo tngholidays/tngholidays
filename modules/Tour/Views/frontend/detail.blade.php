@@ -5,7 +5,12 @@
     <link rel="stylesheet" type="text/css" href="{{ asset("libs/fotorama/fotorama.css") }}"/>
 @endsection
 <style>
-
+.search-hide {
+     visibility: hidden;
+      opacity: 0;
+      transition: visibility 0s linear 0.33s, opacity 0.33s linear;
+      display: none!important;
+}
 .capText {
     text-transform: uppercase;
 }
@@ -512,6 +517,15 @@ img {
         margin-bottom: 15px;
         line-height: 22px !important;
 }
+.dayStrip {
+        background: #e2f7ff;
+    border-radius: 5px;
+    border: 1px solid #78daff;
+    padding: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
 </style>
 <?php $bookingType = request()->get('type'); ?>
@@ -556,7 +570,12 @@ img {
                                         <div class="form-section-group form-group" v-if="itineraries">
                                         
                                         <div class="itinararyRightSection" v-for="(type,index) in itineraries" v-bind:data-index="index">
-                                            <p data-day="day_1" class="itiDay">@{{type.day}} - <span class="darkText"> @{{type.location}} </span></p>
+                                            <div class="dayStrip itiDay">
+                                                <div class="flexOne">
+                                                    <p class="">@{{type.day}} - <span class="darkText"> @{{type.location}} </span></p>
+                                                </div>
+                                                <a class="font12 latoBold"  @click="openMealModel($event, index)">ADD MEAL</a>
+                                            </div>
                                             
                                             <div class="flexOne transfer-section" v-if="type.transfer" v-for="(transfer,transIndex) in type.transfer">
                                                 <div class="joining-line" v-if="transIndex > 0 && index == 0"></div>
@@ -653,9 +672,7 @@ img {
                                             <div class="joining-line"></div>
                                             <div class="end-day-banner">
                                                 <div class="makeFlex flexOne hrtlCenter">
-                                                    <div class="icon">
-                        <i class="icofont-beach"></i>
-                    </div>
+                                                    <div class="icon"><i class="icofont-beach"></i></div>
                                                     <div class="flexOne end-day-info">
                                                         <p class="font16 blackText latoBold appendBottom3">End of day</p>
                                                         <p class="font12 darkText">Spend time at leisure or add an activity</p>
@@ -669,7 +686,12 @@ img {
                                     <div id="tab2" class="tab-pane fade">
                                         <div class="form-section-group form-group" v-if="itineraries">
                                             <div class="itinararyRightSection" v-for="(type,index) in itineraries" v-bind:data-index="index">
-                                                <p data-day="day_1" class="itiDay" v-if="type.hotel">@{{type.day}} - <span class="darkText"> @{{type.location}} </span></p>
+                                                <div class="dayStrip itiDay" v-if="type.hotel">
+                                                    <div class="flexOne">
+                                                        <p class="">@{{type.day}} - <span class="darkText"> @{{type.location}} </span></p>
+                                                    </div>
+                                                    <a class="font12 latoBold"  @click="openMealModel($event, index)">ADD MEAL</a>
+                                                </div>
                                                 
                                                 <div class="transferandHotels" v-if="type.hotel">
                                                     <div class="makeFlex padding10 card hotelSection form-group" v-if="type.hotel" v-bind:data-index="type.index">
@@ -719,7 +741,12 @@ img {
                                     <div id="tab3" class="tab-pane fade">
                                         <div class="form-section-group form-group" v-if="itineraries">
                                             <div class="itinararyRightSection" v-for="(type,index) in itineraries" v-bind:data-index="index">
-                                                <p data-day="day_1" class="itiDay" v-if="type.transfer.length > 0">@{{type.day}} - <span class="darkText"> @{{type.location}} </span></p>
+                                                <div class="dayStrip itiDay"  v-if="type.transfer.length > 0">
+                                                    <div class="flexOne">
+                                                        <p class="">@{{type.day}} - <span class="darkText"> @{{type.location}} </span></p>
+                                                    </div>
+                                                    <a class="font12 latoBold" @click="openMealModel($event, index)">ADD MEAL</a>
+                                                </div>
 
                                                 <div class="flexOne transfer-section" v-if="type.transfer" v-for="(transfer,transIndex) in type.transfer">
                                                 <div class="joining-line" v-if="transIndex > 0 && index == 0"></div>
@@ -755,7 +782,12 @@ img {
                                     <div id="tab4" class="tab-pane fade">
                                         <div class="form-section-group form-group" v-if="itineraries">
                                             <div class="itinararyRightSection" v-for="(type,index) in itineraries" v-bind:data-index="index">
-                                                <p data-day="day_1" class="itiDay">@{{type.day}} - <span class="darkText"> @{{type.location}} </span></p>
+                                                <div class="dayStrip itiDay" v-if="type.transfer.length > 0">
+                                                    <div class="flexOne">
+                                                        <p class="">@{{type.day}} - <span class="darkText"> @{{type.location}} </span></p>
+                                                    </div>
+                                                    <a class="font12 latoBold"  @click="openMealModel($event, index)">ADD MEAL</a>
+                                                </div>
                                                 <div class="activity-section" v-if="type.morning_activity" v-for="(value,actIndex) in type.morning_activity">
                                                     @include('Tour::frontend.layouts.details.tour-activity',['typeActivity' => "1"])
                                                 </div>

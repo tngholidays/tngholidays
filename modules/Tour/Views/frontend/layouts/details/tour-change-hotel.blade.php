@@ -6,10 +6,15 @@
                 <span aria-hidden="true">&times;</span>
             </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body dataFilterDiv">
+            <div class="row">
+              <div class="form-group col-md-12">
+                  <input type="text" value="" placeholder="{{__("Search...")}}" name="search" data-search="hotels" class="form-control searchInputBox">
+              </div>
+            </div>
             <div class="similar-hotels">
               @if(count($hotels) > 0)
-                <ul class="HotelCardList">
+                <ul class="HotelCardList dataFilter">
                 @foreach ($hotels as $hotel)
                     <?php
                     $default_hotels = $current;
@@ -40,7 +45,7 @@
                        $default_hotels['totalDiffPrice'] = abs($totalRoomPrice)
     
                     ?>
-                    <li class="appendRight20 relative">
+                    <li class="appendRight20 relative data_filter" data-filter-hotels="{{strtolower($hotel->title)}}">
                         <div class="altAcc"><span class="altAccoContainer">Hotel</span></div>
                         <img class="borderRadius4 hotelImg changeRoomFromHotel" src="{{$img}}" alt="{{$hotel->title}}" />
                         

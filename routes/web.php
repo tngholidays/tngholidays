@@ -38,6 +38,7 @@ Route::any('getChangeHotels', '\Modules\Tour\Controllers\TourController@getChang
 Route::any('getChangeRooms', '\Modules\Tour\Controllers\TourController@getChangeRooms');
 
 Route::any('getTourActivities', '\Modules\Tour\Controllers\TourController@getTourActivities');
+Route::any('getTourMeals', '\Modules\Tour\Controllers\TourController@getTourMeals');
 
 Route::any('applyCouponCode', '\Modules\Tour\Controllers\TourController@applyCouponCode');
 //Custom User Login and Register

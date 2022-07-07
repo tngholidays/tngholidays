@@ -147,7 +147,7 @@ table.dataTable thead th:first-child {
     padding: 10px 0px 10px 0px;
 }
 .mainTopClass12 {
-    width: 14.2%;
+    width: 12.2%;
     float: left;
     padding: 0px 10px 0px 24px;
     border-right: 1px solid #ccc;
@@ -213,10 +213,24 @@ table.dataTable thead th:first-child {
                                 <option value="pending" {{'pending'==Request()->status ? 'selected' : '' }}>New Leads</option>
                                 <option value="processing" {{'processing'==Request()->status ? 'selected' : '' }}>Processing</option>
                                 <option value="interested" {{'interested'==Request()->status ? 'selected' : '' }}>Interested</option>
+                                <option value="notinterested" {{'notinterested'==Request()->status ? 'selected' : '' }}>Not Interested</option>
                                 <option value="quotation_send" {{'quotation_send'==Request()->status ? 'selected' : '' }}>Quotation Send</option>
                                 <option value="completed" {{'completed'==Request()->status ? 'selected' : '' }}>Completed</option>
                                 <option value="payment_done" {{'payment_done'==Request()->status ? 'selected' : '' }}>Payment Done</option>
                                 <option value="cancel" {{'cancel'==Request()->status ? 'selected' : '' }}>Cancel</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-2">
+                            <select class="form-control" name="labels">
+                                <option value="">Select Label</option>
+                                <option value="1" {{'1'==Request()->labels ? 'selected' : '' }}>Not Picked</option>
+                                <option value="2" {{'2'==Request()->labels ? 'selected' : '' }}>Call Back</option>
+                                <option value="3" {{'3'==Request()->labels ? 'selected' : '' }}>Not Decide</option>
+                                <option value="4" {{'4'==Request()->labels ? 'selected' : '' }}>On Hold</option>
+                                <option value="5" {{'5'==Request()->labels ? 'selected' : '' }}>Not Intrested</option>
+                                <option value="6" {{'6'==Request()->labels ? 'selected' : '' }}>Cold Followup</option>
+                                <option value="7" {{'7'==Request()->labels ? 'selected' : '' }}>Not Contacted</option>
+                                <option value="8" {{'8'==Request()->labels ? 'selected' : '' }}>Sales Closed</option>
                             </select>
                         </div>
                         <div class="form-group col-2">
@@ -299,6 +313,10 @@ table.dataTable thead th:first-child {
              <div class="mainTopClass12">
                 <h2>{{count($interested)}}</h2>
                 <p class="Clor-3">Interested</p>
+            </div>
+            <div class="mainTopClass12">
+                <h2>{{count($notinterested)}}</h2>
+                <p class="Clor-3">Not Interested</p>
             </div>
             
              <div class="mainTopClass12">
@@ -458,6 +476,49 @@ table.dataTable thead th:first-child {
                                 </div>
                                 <!--board-->
                                 <!--board-->
+                                <div class="board">
+                                    <div class="board-body border-purple">
+                                        <div class="board-heading clearfix">
+                                            <div class="pull-left">Not Interested <span class="totalLeads">({{count($notinterested)}})</span></div>
+                                            <div class="pull-right x-action-icons">
+                                                <!--action add-->
+                                            </div>
+                                        </div>
+                                        <!--cards-->
+                                        <div class="content kanban-content" id="kanban-board-wrapper-notinterested" data-board-name="notinterested">
+                                            <!--dynamic content-->
+                                            <!--each card-->
+                                        @if(count($notinterested)>0)
+                                        @foreach($notinterested as $row)
+                                            <div class="kanban-card" data-task-id="{{$row->id}}" data-action="view" data-toggle="tooltip" title="{{$row->getLastUserActivity()}}">
+                                                @if(!empty($row->labels) && count($row->labels))
+                                                <h6 class="leadBadge">
+                                                @foreach($row->labels as $lbl)
+                                                    <?php
+                                                        $label = getLeadLabel($lbl);
+                                                    ?>
+                                                    <span class="badge badge-pill {{$label['color']}} mr-1" data-toggle="tooltip" title="{{$label['text']}}"> </span>
+                                                @endforeach
+                                                </h6>
+                                                 @endif
+                                                <span class="cancelLead" data-action="cancel" title="Cancel Lead"><i class="fa fa-times" aria-hidden="true"></i></span>
+                                                <span class="spanCritDate">{{date("d-M-Y",strtotime($row->created_at))}}</span>
+                                                <div class="viewLead">
+                                                        <div class="x-title wordwrap">#{{$row->id}} {{$row->name}}</div>
+                                                    <div class="x-meta">
+                                                        <span><strong>E-Mail:</strong> {{$row->email}}</span>
+                                                        <span><strong>Phone:</strong>: {{$row->phone}}</span>
+                                                        <span><strong>Destination:</strong>: {{$row->getLocationById()}}</span>
+                                                        <span><strong>Booking Date:</strong>: {{$row->approx_date}}</span>
+                                                        <span><strong>Assign To:</strong>: {{@$row->AssignUser->name}}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                        @endif
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="board">
                                     <div class="board-body border-purple">
                                         <div class="board-heading clearfix">
