@@ -147,6 +147,7 @@
 <script src='https://cdnjs.cloudflare.com/ajax/libs/eonasdan-bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js'></script>
 <script src="{{ asset('libs/select2/js/select2.min.js') }}" ></script>
 <script src="{{ asset('libs/bootbox/bootbox.min.js') }}"></script>
+<script src="{{ asset('js/notify.js') }}"></script>
  
 
 
@@ -224,7 +225,30 @@ $(document).on('click', '.has-datetimepicker', function(){
     }).focus();
     $(this).removeClass('has-datetimepicker');
 });
+$(document).ready(function(){
+    var  reminders = {!!  getLeadReminder() !!};
+    $.each(reminders, function (key, val) {
 
+        $.notify.addStyle('foo', {
+          html: 
+            '<div class="toast" data-id="'+val.id+'" data-task-id="'+val.enquiry_id+'"> <div class="toast-header"><strong class="mr-auto"><i class="fa fa-bell"></i> Notification !</strong> <button type="button" class="ml-2 mb-1 close"> <span aria-hidden="true">&times;</span> </button> </div> <div class="toast-body">#'+val.enquiry_id+' - '+val.content+'</div><div class="toast-footer"><button class="btn viewLead" data-notify-text="button"></button></div> </div>'
+        });
+        $.notify({
+          title: val.content,
+          button: 'Ok'
+        }, { 
+          style: 'foo',
+          autoHide: false,
+          clickToHide: false
+        });
+    });
+});
+
+//listen for click events from this style
+$(document).on('click', '.notifyjs-foo-base .close', function() {
+  //programmatically trigger propogating hide event
+  $(this).trigger('notify-hide');
+});
 </script>
 <!-- <script src='https://cdn.jsdelivr.net/jquery/1.12.4/jquery.min.js'></script> -->
 <script src='https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js'></script>

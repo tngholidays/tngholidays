@@ -304,11 +304,11 @@ table.dataTable thead>tr>th {
                                     }elseif($lbl == 5){
                                         $lbl5 = true;
                                     }elseif($lbl == 6){
-                                        $lbl6 = true;
+                                        $lbl5 = true;
                                     }elseif($lbl == 7){
-                                        $lbl7 = true;
+                                        $lbl5 = true;
                                     }elseif($lbl == 8){
-                                        $lbl8 = true;
+                                        $lbl5 = true;
                                     }
                                 }
                             }

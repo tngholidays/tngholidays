@@ -86,6 +86,10 @@ class Enquiry extends BaseModel
         $row = BookingProposal::select('id','tour_id','booking_status','tour_details')->where("enquiry_id", $this->id)->where("status", 'publish')->first();
         return $row;
     }
+     public function booking()
+    {
+        return $this->hasOne(Booking::class, 'id', 'booking_id');
+    }
     public function getStatusNameAttribute()
     {
         return booking_status_to_text($this->status);

@@ -911,6 +911,76 @@ img {
         </div>
     </div>
     <div class="modal fade" role="dialog" id="change_tour_activity"></div>
+    <div class="modal fade" role="dialog" id="filterModal">
+        <div class="modal-dialog modal-dialog-centered modal-lg change_booking_hotel">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Advance filters:</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body customFilter">
+
+                    <div class="bravo_filter row">
+                        <div class="g-filter-item col-md-4" data-location="" data-type="">
+                            <div class="item-title">
+                                <h6> Hotel Star </h6>
+                            </div>
+                            <div class="item-content">
+                                <ul>
+                                    @for ($number = 5 ;$number >= 1 ; $number--)
+                                        <li>
+                                            <div class="bravo-checkbox">
+                                                <label>
+                                                    <input name="star_rate[]" type="checkbox" value="{{$number}}" data-type="rating">
+                                                    <span class="checkmark"></span>
+                                                    @for ($star = 1 ;$star <= $number ; $star++)
+                                                        <i class="fa fa-star"></i>
+                                                    @endfor
+                                                </label>
+                                            </div>
+                                        </li>
+                                    @endfor
+                                </ul>
+                            </div>
+                        </div>
+                         @foreach ($hotel_attributes as $item)
+                            @php
+                                $translate = $item->translateOrOrigin(app()->getLocale());
+                            @endphp
+                            <div class="g-filter-item col-md-4" data-location="{{$item->location}}" data-type="{{$item->type}}">
+                                <div class="item-title">
+                                    <h6> {{$translate->name}} </h6>
+                                </div>
+                                <div class="item-content">
+                                    <ul>
+                                        @foreach($item->terms as $key => $term)
+                                            @php $translate = $term->translateOrOrigin(app()->getLocale()); @endphp
+                                            <li>
+                                                <div class="bravo-checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="terms[]" value="{{$term->id}}" data-type="terms"> {!! $translate->name !!}
+                                                        <span class="checkmark"></span>
+                                                    </label>
+                                                </div>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        @endforeach
+                        <div class="col-md-12">
+                           <div class="right">
+                                <button class="btn btn-primary applyFilters" type="button">{{__("Apply")}}</button>
+                            </div>
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="loading-all" style="display: none;"><span><img src="{{ asset("images/loader.gif") }}"></span></div>
 @endsection
 
@@ -947,4 +1017,54 @@ img {
     <script type="text/javascript" src="{{ asset("libs/fotorama/fotorama.js") }}"></script>
     <script type="text/javascript" src="{{ asset("libs/sticky/jquery.sticky.js") }}"></script>
     <script type="text/javascript" src="{{ asset('module/tour/js/single-tour.js?_ver='.config('app.version')) }}"></script>
+    <script>
+        $('#filterModal').on('shown.bs.modal', function (e) {
+          var currentLocationInput = $('#currentLocationInput').val();
+
+          
+          $(".customFilter .bravo_filter .g-filter-item").each(function(){
+                var location_id = $(this).data('location');
+                var type = $(this).data('type');
+                if(location_id != "" && type == '12'){
+                    if (location_id != currentLocationInput) {
+                        $(this).hide();
+                    }
+                }
+            });
+        })
+        jQuery(document).on("click", ".applyFilters", function () {
+            var terms=[];
+            var star_rate=[];
+            $(".customFilter .bravo_filter .bravo-checkbox input:checkbox").each(function(){
+                if($(this).is(":checked")){
+                    if ($(this).data('type') == 'rating') {
+                        star_rate.push($(this).val());
+                    }
+                    if ($(this).data('type') == 'terms') {
+                        terms.push($(this).val());
+                    }
+                    
+                }
+            });
+            var currentHotelInput = $('#currentHotelInput').val();
+            currentHotelInput = JSON.parse(currentHotelInput);
+            $('.loading-all').show();
+            $.ajax({
+                url:'{{route("tour.getFilterHotels")}}',
+                dataType:"HTML",
+                type:'POST',
+                data:{
+                    'terms':terms,'star_rate':star_rate,'default_hotels':currentHotelInput
+                },
+                success:function (data) {
+                   $('#change_booking_hotel .modal-body .similar-hotels').html(data);
+                   $('#filterModal').modal('hide');
+                   $('.loading-all').hide();
+                },
+                error:function (e) {
+
+                }
+            });
+        });
+    </script>
 @endsection

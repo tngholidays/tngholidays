@@ -211,13 +211,15 @@
             $getBookingData['enquiry_id'] = $request->enquiry;
 
             $getBookingData['hotelrooms'] = array(array('adults'=>2,'children'=>0,'room'=>1,'price'=>1));
-            $getBookingData['is_user_verified'] = null;
+            $getBookingData['is_user_verified'] = @\Auth::user()->is_verified;
+            $hotel_attributes = Attributes::where('service', 'hotel')->with(['terms','translations'])->get();   
             $data = [
                 'row' => $row,
                 'translation' => $translation,
                 'itineraries' => $itineraries,
                 'tour_related' => $tour_related,
                 'booking_data' => $getBookingData,
+                'hotel_attributes' => $hotel_attributes,
                 'review_list' => $review_list,
                 'seo_meta' => $row->getSeoMetaWithTranslation(app()->getLocale(), $translation),
                 'body_class'=>'is_single'
@@ -231,6 +233,7 @@
             $details = $data['default_hotels'];
             $details['total_guest'] = ($data['total_guest'] < 1) ? 1 : $data['total_guest'];
             $start_date = $data['start_date'];
+            $details['start_date'] = $start_date;
             $hotels = Hotel::with('location','rooms')->whereHas('rooms', function($q){ $q->where('title','like','%standard%');})
             ->where('id', '!=', $details['hotel'])->where('location_id', $details['location_id'])->where("status", "publish")->get();
             $current = $details;
@@ -249,6 +252,7 @@
         public function getTourActivities(Request $request)
         {
             $data = $request->all();
+            $request->all_ids = $request->all_ids ?? [];
             $term = null;
             $duration = 0;
             $evening = 0;
@@ -319,5 +323,27 @@
             }else{
                 return 0;
             }
+        }
+        public function getFilterHotels(Request $request)
+        {
+            $data = $request->all();
+            $details = $data['default_hotels'];
+            $details['total_guest'] = ($details['total_guest'] < 1) ? 1 : $details['total_guest'];
+            $start_date = $details['start_date'];
+            $hotelQuery = Hotel::with('location','rooms')->whereHas('rooms', function($q){ $q->where('title','like','%standard%');})
+            ->where('id', '!=', $details['hotel'])->where('location_id', $details['location_id'])->where("status", "publish");
+
+            if (!empty($request->terms) && count($request->terms) > 0) {
+                $hotelQuery->whereHas('terms',function ($q) use($request){
+                    $q->where('term_id', $request->terms);
+                });
+            }
+            if (!empty($request->star_rate)) {
+                $hotelQuery->WhereIn('star_rate',$request->star_rate);
+            }
+            $hotels = $hotelQuery->get();
+
+            $current = $details;
+            return view('Tour::frontend.layouts.details.filter-hotel-list', compact('hotels','current','start_date'));
         }
     }

@@ -19,15 +19,19 @@ use Modules\Booking\Models\Booking;
     use Modules\Tour\Models\ManageVoucher;
     use Modules\Core\Models\Terms;
     use Modules\Booking\Models\BookingProposal;
+    use Modules\Booking\Models\Enquiry;
+    use Modules\Lead\Models\LeadReminder;
         use Propaganistas\LaravelPhone\PhoneNumber;
   use Modules\Sms\Core\Facade\Sms;
   use SimpleSoftwareIO\QrCode\Facades\QrCode;
+  use Modules\Lead\Exports\LeadExport;
     use PDF;
     use Mail;
     use File;
     use Swift_SmtpTransport;
     use Swift_Mailer;
     use DB;
+    use Excel;
 
 class BookingController extends AdminController
 {
@@ -596,5 +600,203 @@ class BookingController extends AdminController
         
          
         return back()->with('success', __('Booking documents updated'));
+    }
+   public function leadsReport(Request $request)
+    {   
+        $search = $request->query('search');
+        $assigned_to = $request->query('assigned_to');
+        $from_date = $request->query('from_date');
+        $to_date = $request->query('to_date');
+        $destination = $request->query('destination');
+        $status = $request->query('status');
+        $file_type = $request->query('file_type');
+
+        $params = array();
+         if (empty($request->input('from_date')) && empty($request->input('to_date'))) {
+             $params['from_date'] = date('d/m/Y');
+             $params['to_date'] = date('d/m/Y');
+             return redirect()->route('report.admin.leadsReport',$params)->withInput();
+         }
+        // $leads = Enquiry::with('vendor.AssignUser')->orderBy('id','DESC')->paginate(10);
+        // dd($leads);
+        $query = Enquiry::with('AssignUser','CreateUser','UpdateUser','booking');
+        // $query->whereHas('booking', function($q) use($request){ $q->where('status', 'paid'); });
+        if (!empty($request->search)) {
+            $query->whereHas('booking', function($q) use($request){ $q->where('id',$request->search); });
+            
+            $title_page = __('Search results: ":s"', ["s" => $request->search]);
+        }
+        if (!empty($assigned_to)) {
+            $query->where('assign_to', $assigned_to);
+        }
+        if (!empty($destination)) {
+            $query->where('destination', $request->destination);
+        }
+        if (!empty($status)) {
+            $query->where('status', $status);
+        }
+
+        if (!empty($from_date)) {
+            $from_date = str_replace("/", "-", $from_date);
+            $from_date = date('Y-m-d', strtotime($from_date));
+            $query->whereDate('created_at','>=', $from_date);
+        }
+        if (!empty($to_date)) {
+            $to_date = str_replace("/", "-", $to_date);
+            $to_date = date('Y-m-d', strtotime($to_date));
+            $query->whereDate('created_at','<=', $to_date);
+        }
+        $rows = $query->orderBy('id','DESC')->get();
+        $staffs = User::select('first_name','last_name','id')->whereHas('roles', function($q){
+            $q->whereIn('name', ['staff','sub-staff']);
+        })->orderBy('id','ASC')->get();
+        
+        // $vendors = User::select('name','id')->role('vendor')->get();
+        if(!empty($file_type) && $file_type == "excel")
+        {
+             // return Excel::download(new LeadExport($dataArray), 'leads.xlsx');
+            $dataArray = [];
+            $dataArray[] = ['Leads Report'];
+            $dataArray[] = ['Booking ID','Business Name','Destination','Approx Date','No. Pax.','Created At.','Proposal Price','Status','Call Status','AssignUser','CreateUser','UpdateUser','Last Comment'];
+            if ($rows->count() > 0) {
+                foreach ($rows as $key => $row) {
+                    $total_sale_price = @$row->booking->total ?? 0;
+                    if ($row->has('booking') && !empty($row->booking->proposal_discount)) {
+                        if ($row->booking->proposal_discount < 0) {
+                            $total_sale_price = $row->booking->total - abs($row->booking->proposal_discount);
+                        }else{
+                            $total_sale_price = $row->booking->total + abs($row->booking->proposal_discount);
+                        }
+                    }
+                    $lblArray = [];
+                     if(!empty($row->labels) && count($row->labels)){
+                        foreach ($row->labels as $key => $lbl) {
+                            $lblArray[] = getLeadLabel($lbl)['text'] ?? null;
+                        }
+                     }
+                    $adult = $row->person_types[0]['number'] ?? 0;
+                    $child = $row->person_types[1]['number'] ?? 0;
+                    $kids = $row->person_types[2]['number'] ?? 0;
+                    $dataArray[] = array(
+                       $row->booking_id,
+                       $row->name.' -'.$row->id,
+                       // $row->email,
+                       @getLocationById(@$row->destination)->name ?? null,
+                       display_date($row->approx_date),
+                       'Adult: '.$adult.', Child: '.$child.', Kid: '.$kids,
+                       $row->created_at,
+                       $total_sale_price,
+                       $row->status,
+                       implode(',', $lblArray),
+                       @$row->AssignUser->name,
+                       @$row->CreateUser->name,
+                       
+                       $row->getLastUserActivity()
+                       // $row->UpdateUser->name,
+                    );
+                }
+            }
+
+            return Excel::download(new LeadExport($dataArray), 'leads-report.xlsx');
+        }
+        $data = [
+            'rows'      => $rows,
+            'staffs'    => $staffs,
+            'breadcrumbs' => [
+                [
+                    'name' => __('Enquiry'),
+                    'url'  => 'admin/module/report/enquiry'
+                ],
+                [
+                    'name'  => __('All'),
+                    'class' => 'active'
+                ],
+            ],
+            'statues'        => Enquiry::$enquiryStatus,
+            'page_title'=> $title_page ?? __("Enquiry Management")
+        ];
+        return view('Report::admin.reports.leads-report', $data);
+    }
+
+    public function reminderReport(Request $request)
+    {   
+        $search = $request->query('search');
+        $user = $request->query('user');
+        $from_date = $request->query('from_date');
+        $to_date = $request->query('to_date');
+        $destination = $request->query('destination');
+        $status = $request->query('status');
+        $file_type = $request->query('file_type');
+        
+
+        $params = array();
+         if (empty($request->input('from_date')) && empty($request->input('to_date'))) {
+             $params['from_date'] = date('d/m/Y');
+             $params['to_date'] = date('d/m/Y');
+             return redirect()->route('report.admin.reminderReport',$params)->withInput();
+         }
+        $query = LeadReminder::with('CreateUser','enquiry');
+
+        if (!empty($user)) {
+            $query->where('create_user', $user);
+        }
+        if (!empty($status)) {
+            $status = $status == 2 ? 0 : 1;
+            $query->where('read_status', $status);
+        }
+        if (!empty($from_date)) {
+            $from_date = str_replace("/", "-", $from_date);
+            $from_date = date('Y-m-d', strtotime($from_date));
+            $query->whereDate('date','>=', $from_date);
+        }
+        if (!empty($to_date)) {
+            $to_date = str_replace("/", "-", $to_date);
+            $to_date = date('Y-m-d', strtotime($to_date));
+            $query->whereDate('date','<=', $to_date);
+        }
+        $rows = $query->orderBy('id','DESC')->get();
+        $staffs = User::select('first_name','last_name','id')->whereHas('roles', function($q){
+            $q->whereIn('name', ['staff','sub-staff']);
+        })->orderBy('id','ASC')->get();
+        
+        // $vendors = User::select('name','id')->role('vendor')->get();
+        if(!empty($file_type) && $file_type == "excel")
+        {
+             // return Excel::download(new LeadExport($dataArray), 'leads.xlsx');
+            $dataArray = [];
+            $dataArray[] = ['Reminder Report'];
+            $dataArray[] = ['Enquery ID','Date/Time','Message','Created At','Status','CreateUser'];
+            if ($rows->count() > 0) {
+                foreach ($rows as $key => $row) {
+                    $dataArray[] = array(
+                       $row->enquiry_id,
+                       $row->date,
+                       $row->content,
+                       $row->created_at,
+                       $row->read_status==1 ? 'Read' : 'Not Read',
+                       @$row->CreateUser->name,
+                    );
+                }
+            }
+
+            return Excel::download(new LeadExport($dataArray), 'leads-report.xlsx');
+        }
+        $data = [
+            'rows'      => $rows,
+            'staffs'    => $staffs,
+            'breadcrumbs' => [
+                [
+                    'name' => __('Enquiry'),
+                    'url'  => 'admin/module/report/enquiry'
+                ],
+                [
+                    'name'  => __('All'),
+                    'class' => 'active'
+                ],
+            ],
+            'statues'        => Enquiry::$enquiryStatus,
+            'page_title'=> $title_page ?? __("Enquiry Management")
+        ];
+        return view('Report::admin.reports.reminder-report', $data);
     }
 }

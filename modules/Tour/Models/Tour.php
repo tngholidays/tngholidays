@@ -489,7 +489,6 @@ class Tour extends Bookable
             $total = $total + floatval($total_sightseeing_price);
             $attributesss = getTermsById($this->tour_term->pluck('term_id'));
             $before_sale_price = $this->before_sale_price*$total_guests;
-
             if ($meta->discount_by_people and !empty($meta->discount_by_people)) {
                 foreach ($meta->discount_by_people as $type) {
                     if ($type['from'] <= $total_guests and (!$type['to'] or $type['to'] >= $total_guests)) {
@@ -628,6 +627,7 @@ class Tour extends Bookable
             $booking->addMeta('modify_activity', $modify_activity);
             $booking->addMeta('default_hotel_price', $default_hotel_price);
             $booking->addMeta('hotel_rooms', $hotel_rooms);
+            $booking->addMeta('before_sale_price', $before_sale_price);
 
             if ($this->isDepositEnable()) {
                 $booking->addMeta('deposit_info', [
@@ -901,6 +901,7 @@ class Tour extends Bookable
             $booking->addMeta('person_types', $person_types);
             $booking->addMeta('discount_by_people', $discount_by_people);
             $booking->addMeta('applied_coupon', $applied_coupon);
+            $booking->addMeta('before_sale_price', $before_sale_price);
             if ($tour->isDepositEnable()) {
                 $booking->addMeta('deposit_info', [
                     'type'    => $tour->getDepositType(),

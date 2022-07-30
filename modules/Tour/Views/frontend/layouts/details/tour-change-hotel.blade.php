@@ -8,8 +8,13 @@
         </div>
         <div class="modal-body dataFilterDiv">
             <div class="row">
-              <div class="form-group col-md-12">
+              <div class="form-group col-md-10">
                   <input type="text" value="" placeholder="{{__("Search...")}}" name="search" data-search="hotels" class="form-control searchInputBox">
+                  <input type="hidden" id="currentHotelInput" value="{{json_encode($current)}}">
+                  <input type="hidden" id="currentLocationInput" value="{{$current['location_id']}}">
+              </div>
+              <div class="form-group col-md-2">
+                 <button class="btn btn-primary filterModal" data-toggle="modal" data-target="#filterModal" type="button">{{__("Filter")}}</button>
               </div>
             </div>
             <div class="similar-hotels">

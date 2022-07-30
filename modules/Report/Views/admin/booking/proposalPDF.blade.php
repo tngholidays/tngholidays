@@ -34,6 +34,9 @@ body { background:transparent;}
 <style media="screen">
 @page {
 	margin: 3mm 3mm 0mm 3mm; /* this affects the margin in the printer settings */
+	tr {
+      page-break-inside: always!important; 
+    }
 }
 footer {
               position: fixed;
@@ -139,16 +142,18 @@ footer {
       <table style="width:100%;background:#70b5ce; padding: 10px 20px; height:270px;" cellpadding="0" cellspacing="0">
         <tbody>
           <tr>
-           <td colspan="2" style=" padding:0px 20px;"><h2 style="font-size: 26px; color:#fff; line-height: 32px;">{{@$tour->title}} <br><span style="color: #ffff26;">{{$row->name}}</span></h2></td>
+           <td colspan="2" style=" padding:0px 20px;"><h2 style="font-size: 26px; color:#fff; line-height: 32px;">{{@$tour->title}} <br><span style="color: #ffff26;">{{@$row->name}}</span></h2></td>
           </tr>
           <tr>
             <td style="color: #fff; line-height: 22px; font-size: 15px;padding:10px 0px 10px 20px;">
-              {{getTermById($row->duration)->name}} <br>INR {{$row->total_tour_price}} Tour Budget/Cost
+              {{@getTermById(@$row->duration)->name}} <br>INR {{@$row->total_tour_price}} Tour Budget/Cost
               @if($flightss) <br>INR {{$flightPrice}}/-* Tour Flight Charge (T&C Apply) @endif
 
               
               <br> <span style="font-size:12px;">(Extra 5% GST)</span> <br>
               {{$nuadult}} Adult and {{$nuchild}} Child 
+              <br>
+               Rooms {{$nurooms}} 
               <br>
              <b>Departure dates:</b> {{ date('d M, Y', strtotime($row->start_date))}}
             </td>
@@ -207,7 +212,7 @@ footer {
                </tr>
                <tr>
                  <td style=" font-size: 15px; padding:100px 20px 0px 20px;color: #888c80;">
-                   <p><strong>Dear {{$row->name}}</strong>,</p>
+                   <p><strong>Dear {{@$row->name}}</strong>,</p>
                  {!! $row->welcome_note !!}
                  </td>
                </tr>
@@ -226,22 +231,22 @@ footer {
     <tbody>
     <tr>
       <td>
-      <table cellpadding="0" cellspacing="0" style="width:100%;">
-        <tbody>
-          <tr>
-          <td style="background: #81d5f3; text-align: right; padding: 15px 20px 8px 20px;"><img width="140" src="{{ public_path('uploads/logo.png') }}" /></td>
-          </tr>
-          <tr>
-	          <td style="background: #81d5f3; color:#fff; font-size:24px; padding: 0px 20px 15px 20px; font-weight: 700;">Daywise Itinerary</td>
-          </tr>
-        </tbody>
-      </table>
-      </td>
-    </tr>
-    <tr>
-      <td>
         <table cellpadding="0" cellspacing="0" style="width: 100%; padding: 15px 0px 0px; width:100%; table-layout: fixed;">
             <tbody>
+                <tr>
+                  <td>
+                  <table cellpadding="0" cellspacing="0" style="width:100%;">
+                    <tbody>
+                      <tr>
+                      <td style="background: #81d5f3; text-align: right; padding: 15px 20px 8px 20px;"><img width="140" src="{{ public_path('uploads/logo.png') }}" /></td>
+                      </tr>
+                      <tr>
+            	          <td style="background: #81d5f3; color:#fff; font-size:24px; padding: 0px 20px 15px 20px; font-weight: 700;">Daywise Itinerary</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  </td>
+                </tr>
                 <tr>
                     <td style="text-align: right; width: 195px;">
                         <table cellpadding="0" cellspacing="0" style="width: 100%;">
@@ -350,7 +355,7 @@ footer {
                     <td colspan="4">
                         <table cellpadding="0" cellspacing="0" style="width: 100%; table-layout: fixed;">
                             <tr>
-                                <td colspan="3" style="border: 1px solid #aedad5;text-align: left; background: #aedad5; font-size: 19px; padding: 8px 10px;"><strong>Extra Services (inluded in package) </strong>
+                                <td colspan="3" style="border: 1px solid #81d5f3;text-align: left; background: #81d5f3; font-size: 19px; padding: 8px 10px;"><strong>Extra Services (inluded in package) </strong>
                                 </td>
 
                             </tr>
@@ -366,135 +371,128 @@ footer {
                 </tr>
                 <tr><td colspan="4" style="padding-top: 8px;"></td></tr>
                 @endif
-
+                
                 @if(!empty($tour_activities))
                 @foreach($tour_activities as $key=>$summary)
-                <?php $summary['rowspan'] +=1 ?>
+                
                 <tr>
                     <td colspan="4">
-                        <table cellpadding="0" cellspacing="0" style="width: 100%; table-layout: fixed;">
-                    <tbody>
-
-                @if(count($summary['hotel']) > 0)
-                <tr>
-
-                    <td style="text-align: left; background: #aedad5; font-size: 19px; padding: 8px 10px;">
-                        <img src="{{ public_path('uploads/location-icon.png') }}" style="width: 22px; float: left; margin: -4px 7px 0px 0px;" /><strong>{{$summary['location']}} </strong>
-                    </td>
-                    <td colspan="3" style="text-align: left; background: #aedad5; font-size: 19px; padding: 0px 0px;"></td>
-
-                </tr>
-                @endif
-                
-                <tr class="NewRow">
-                    <td rowspan="{{$summary['rowspan']}}"  style="text-align: left;font-size: 14px;border: 1px solid #ccc;  padding: 8px 10px 0px; background: #fff; width: 144px;vertical-align: top;"><strong>{{$summary['date']}}, {{$summary['day']}}</strong></td>
-                    <td colspan="3" style="float: left; margin: -10px;border-left: 1px solid #ccc;border-right: 1px solid #ccc;"></td>
-                </tr>
-                @if(!empty($summary['breackfast']))
-                <tr>
-                    <td colspan="3"style="border: 1px solid #ccc;border-top:0px;  font-size: 14px; padding: 0px 8px 8px; border-left: 0px;"><img src="{{ public_path('uploads/food-icon.png') }}" style="width: 22px;margin-right: 5px;" />{{$summary['breackfast'] ?? ""}}</td>
-                </tr>
-                @endif
-                @if(count($summary['transfer']) > 0)
-                    @foreach($summary['transfer'] as $key=>$transfer)
-                    <tr>
-
-                        <td colspan="3" style="border: 1px solid #ccc;border-top:0px; font-size: 14px; padding: 8px 8px 8px; border-left: 0px;"><img src="{{ public_path('uploads/book-icon.png') }}" style="width: 22px; margin-right: 5px;" />{{$transfer['name'] ?? ""}}</td>
-                    </tr>
-                    @endforeach
-                @endif
-
-
-                @if(count($summary['hotel']) > 0)
-                <tr>
-                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px;  font-size: 14px; padding: 8px 8px 8px; border-left: 0px;"><img src="{{ public_path('uploads/home-icon.png') }}" style="width: 22px; margin-right: 5px;" />Check in to {{$summary['hotel']['hotel_name'] ?? ""}}
-                    <div style="padding-left:27px;font-size: 12px;">
-                            <span>Room: {{$summary['hotel']['room_name'] ?? ""}}</span>
-                        </div>
-                    </td>
-                </tr>
-                @endif
-
-                @if(count($summary['morning_activity']) > 0)
-                @foreach($summary['morning_activity'] as $key => $activity)
-                <tr>
-
-                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px; font-size: 14px; padding: 8px 8px 8px; border-left: 0px;">
-                        <img src="{{ public_path('uploads/book-icon.png') }}" style="width: 22px; margin-right: 5px;" />
-                        {{$activity['name'] ?? ""}}
-                    @if(!empty($activity['inclusions_name']) || !empty($activity['exclude']) || !empty($activity['duration']))
-                    <div style="padding-left:27px;font-size: 12px;">
-                        @if(!empty($activity['duration']))
-                        <span>Duration: {{$activity['duration'] ?? ""}}</span>
-                        <br>
-                        @endif
-                        @if(!empty($activity['inclusions_name']))
-                        <span>Inclusions: {{$activity['inclusions_name'] ?? ""}}</span>
-                        <br>
-                        @endif
-                        @if(!empty($activity['exclude']))
-                        <span>Exclusions: {{$activity['exclude'] ?? ""}}</span>
-                        @endif
-                    </div>
-                    @endif
-                    
-                    </td>
-                </tr>
-                @endforeach
-                @endif
-
-                @if(count($summary['activity']) > 0)
-                @foreach($summary['activity'] as $key=>$activity)
-                <tr>
-
-                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px;  font-size: 14px; padding: 8px 8px 8px; border-left: 0px;"><img src="{{ public_path('uploads/book-icon.png') }}" style="width: 22px; margin-right:5px;" />{{$activity['name'] ?? ""}}
-                    @if(!empty($activity['inclusions_name']) || !empty($activity['exclude']) || !empty($activity['duration']))
-                    <div style="padding-left:27px;font-size: 12px;">
-                        @if(!empty($activity['duration']))
-                        <span>Duration: {{$activity['duration'] ?? ""}}Hrs. </span>
-                        <br>
-                        @endif
-                        @if(!empty($activity['inclusions_name']))
-                        <span>Inclusions: {{$activity['inclusions_name'] ?? ""}}</span>
-                        <br>
-                        @endif
-                        @if(!empty($activity['exclude']))
-                        <span>Exclusions: {{$activity['exclude'] ?? ""}}</span>
-                        @endif
-                    </div>
-                    @endif
-                    
-                    </td>
-                </tr>
-                @endforeach
-                @endif
-
-                @if(count($summary['evening_activity']) > 0)
-                @foreach($summary['evening_activity'] as $key=>$activity)
-                <tr>
-
-                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px;  font-size: 14px; padding: 8px 8px 8px; border-left: 0px;"><img src="{{ public_path('uploads/book-icon.png') }}" style="width: 22px; margin-right: 5px;" />{{$activity['name'] ?? ""}}
-                    @if(!empty($activity['inclusions_name']) || !empty($activity['exclude']) || !empty($activity['duration']))
-                    <div style="padding-left:27px;font-size: 12px;">
-                        @if(!empty($activity['duration']))
-                        <span>Duration: {{$activity['duration'] ?? ""}}Hrs. </span>
-                        <br>
-                        @endif
-                        @if(!empty($activity['inclusions_name']))
-                        <span>Inclusions: {{$activity['inclusions_name'] ?? ""}} </span>
-                        <br>
-                        @endif
-                        @if(!empty($activity['exclude']))
-                        <span>Exclusions: {{$activity['exclude'] ?? ""}}</span>
-                        @endif
-                    </div>
-                    @endif
-                    </td>
-                </tr>
-                @endforeach
-                @endif
-                    </tbody>
-                </table>
+                        <table cellpadding="0" cellspacing="0" style="width: 100%; clear: both; table-layout: fixed;page-break-inside: always;">
+                            <tbody>
+                                 @if(count($summary['hotel']) > 0)
+                                <tr>
+                                    <td style="text-align: left; background: #aedad5; font-size: 19px; padding: 8px 10px;">
+                                        <img src="{{ public_path('uploads/location-icon.png') }}" style="width: 22px; float: left; margin: -4px 7px 0px 0px;" /><strong>{{$summary['location']}} </strong>
+                                    </td>
+                                    <td colspan="3" style="text-align: left; background: #aedad5; font-size: 19px; padding: 0px 0px;"></td>
+                                </tr>
+                                @endif
+                                <tr class="NewRow">
+                                    <td rowspan="{{$summary['rowspan']}}"  style="text-align: left;font-size: 14px;border: 1px solid #ccc;  padding: 8px 10px 0px; background: #fff; width: 144px;vertical-align: top;"><strong>{{$summary['date']}}, {{$summary['day']}}</strong></td>
+                                    <td colspan="3" style="float: left; margin: -10px;border-left: 1px solid #ccc;border-right: 1px solid #ccc;"></td>
+                                </tr>
+                                @if(!empty($summary['breackfast']))
+                                <tr>
+                                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px; font-size: 14px; padding: 8px 8px 8px; border-left: 0px;">
+                                        <img src="{{ public_path('uploads/food-icon.png') }}" style="width: 22px; margin-right: 5px;" />{{$summary['breackfast'] ?? ""}}
+                                    </td>
+                                </tr>
+                                @endif
+                                @if(count($summary['transfer']) > 0)
+                                @foreach($summary['transfer'] as $key=>$transfer)
+                                <tr>
+                                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px; font-size: 14px; padding: 8px 8px 8px; border-left: 0px;">
+                                        <img src="{{ public_path('uploads/car.png') }}" style="width: 22px; margin-right: 5px;" />{{$transfer['name'] ?? ""}}
+                                    </td>
+                                </tr>
+                                @endforeach
+                                @endif
+                                
+                                @if(count($summary['hotel']) > 0)
+                                <tr>
+                                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px; font-size: 14px; padding: 8px 8px 8px; border-left: 0px;">
+                                        <img src="{{ public_path('uploads/home-icon.png') }}" style="width: 22px; margin-right: 5px;" />Check in to {{$summary['hotel']['hotel_name'] ?? ""}}
+                                        <div style="padding-left:27px;font-size: 12px;">
+                                                <span>Room: {{$summary['hotel']['room_name'] ?? ""}}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endif
+                                
+                                @if(count($summary['morning_activity']) > 0)
+                                @foreach($summary['morning_activity'] as $key => $activity)
+                                <tr>
+                                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px; font-size: 14px; padding: 8px 8px 8px; border-left: 0px;">
+                                        <img src="{{ public_path('uploads/book-icon.png') }}" style="width: 22px; margin-right: 5px;" />{{$activity['name'] ?? ""}}
+                                         @if(!empty($activity['inclusions_name']) || !empty($activity['exclude']) || !empty($activity['duration']))
+                                            <div style="padding-left:27px;font-size: 12px;">
+                                                @if(!empty($activity['duration']))
+                                                <span>Duration: {{$activity['duration'] ?? ""}}</span>
+                                                <br>
+                                                @endif
+                                                @if(!empty($activity['inclusions_name']))
+                                                <span>Inclusions: {{$activity['inclusions_name'] ?? ""}}</span>
+                                                <br>
+                                                @endif
+                                                @if(!empty($activity['exclude']))
+                                                <span>Exclusions: {{$activity['exclude'] ?? ""}}</span>
+                                                @endif
+                                            </div>
+                                            @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                                @endif
+                                @if(count($summary['activity']) > 0)
+                                @foreach($summary['activity'] as $key => $activity)
+                                <tr>
+                                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px; font-size: 14px; padding: 8px 8px 8px; border-left: 0px;">
+                                        <img src="{{ public_path('uploads/book-icon.png') }}" style="width: 22px; margin-right: 5px;" />{{$activity['name'] ?? ""}}
+                                         @if(!empty($activity['inclusions_name']) || !empty($activity['exclude']) || !empty($activity['duration']))
+                                            <div style="padding-left:27px;font-size: 12px;">
+                                                @if(!empty($activity['duration']))
+                                                <span>Duration: {{$activity['duration'] ?? ""}}</span>
+                                                <br>
+                                                @endif
+                                                @if(!empty($activity['inclusions_name']))
+                                                <span>Inclusions: {{$activity['inclusions_name'] ?? ""}}</span>
+                                                <br>
+                                                @endif
+                                                @if(!empty($activity['exclude']))
+                                                <span>Exclusions: {{$activity['exclude'] ?? ""}}</span>
+                                                @endif
+                                            </div>
+                                            @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                                @endif
+                                @if(count($summary['evening_activity']) > 0)
+                                @foreach($summary['evening_activity'] as $key => $activity)
+                                <tr>
+                                    <td colspan="3" style="border: 1px solid #ccc;border-top:0px; font-size: 14px; padding: 8px 8px 8px; border-left: 0px;">
+                                        <img src="{{ public_path('uploads/book-icon.png') }}" style="width: 22px; margin-right: 5px;" />{{$activity['name'] ?? ""}}
+                                         @if(!empty($activity['inclusions_name']) || !empty($activity['exclude']) || !empty($activity['duration']))
+                                            <div style="padding-left:27px;font-size: 12px;">
+                                                @if(!empty($activity['duration']))
+                                                <span>Duration: {{$activity['duration'] ?? ""}}</span>
+                                                <br>
+                                                @endif
+                                                @if(!empty($activity['inclusions_name']))
+                                                <span>Inclusions: {{$activity['inclusions_name'] ?? ""}}</span>
+                                                <br>
+                                                @endif
+                                                @if(!empty($activity['exclude']))
+                                                <span>Exclusions: {{$activity['exclude'] ?? ""}}</span>
+                                                @endif
+                                            </div>
+                                            @endif
+                                    </td>
+                                </tr>
+                                @endforeach
+                                @endif
+                            </tbody>
+                        </table>
                     </td>
                 </tr>
                 @endforeach

@@ -2878,6 +2878,28 @@ jQuery(document).on("click", "#tasks-view-wrapper .board .viewLead", function (e
         }
      });
 });
+
+$(document).on('click', '.notifyjs-foo-base .viewLead', function() {
+  //show button text
+  document.body.innerHTML += '<div class="modal fade" id="viewleadInfoModalDup" role="dialog"></div>';
+  var this_task_id = $(this).closest('.notifyjs-foo-base').attr('data-task-id');
+  var reminder_id = $(this).closest('.notifyjs-foo-base').attr('data-id');
+   $.ajax({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        type: 'post',
+        url: bookingCore.url + '/admin/module/Lead/viewleadInfo',
+        dataType: 'HTML',
+        data:{'id':this_task_id,'reminder_id':reminder_id},
+        success: function(data){
+          $('#viewleadInfoModalDup').html(data);
+          $('#viewleadInfoModalDup').modal('show');
+        }
+     });
+  // hide notification
+  $(this).trigger('notify-hide');
+});
 jQuery(document).on("click", ".viewleadInfoModal", function (e, params) {
    var phone = $(this).data('phone');
        $.ajax({

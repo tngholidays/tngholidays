@@ -169,6 +169,35 @@ class AttributeController extends AdminController
         return view('Hotel::admin.terms.index', $data);
     }
 
+    public function addTerm(Request $request, $attr_id)
+    {
+        $this->checkPermission('hotel_manage_attributes');
+        $row = $this->attributesClass::find($attr_id);
+        if (empty($row)) {
+            return redirect()->back()->with('error', __('Term not found!'));
+        }
+        $data = [
+            'attr'        => $row,
+            "row"         => new $this->termsClass(),
+            'translation'    => new TermsTranslation(),
+            'breadcrumbs' => [
+                [
+                    'name' => __('Tour'),
+                    'url'  => 'admin/module/tour'
+                ],
+                [
+                    'name' => __('Attributes'),
+                    'url'  => 'admin/module/tour/attribute'
+                ],
+                [
+                    'name'  => __('Attribute: :name', ['name' => $row->name]),
+                    'class' => 'active'
+                ],
+            ]
+        ];
+        return view('Tour::admin.terms.add', $data);
+    }
+
     public function term_edit(Request $request, $id)
     {
         $this->checkPermission('hotel_manage_attributes');

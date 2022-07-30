@@ -48,10 +48,18 @@ class LeadController extends AdminController
      
         if ($request->isMethod('post')) {
             $data = $request->all();
+            if (!empty($request->reminder_id)) {
+                $reminder = LeadReminder::find($request->reminder_id);
+                if (!empty($reminder)) {
+                    $reminder->read_status = 1;
+                    $reminder->save();
+                }
+            }
             if(isset($data['phone'])){
                $enq =  Enquiry::select('id')->where('phone', 'LIKE', '%'.substr($data['phone'], 3).'%')->orderBy('id','DESC')->first();
                $data['id'] = $enq->id;
             }
+            
             
             $row = Enquiry::with('CreateUser','UpdateUser')->find($data['id']);
             $leads = Enquiry::where('phone', 'LIKE', '%' . $row->phone . '%')->orderBy('id','DESC')->get();
@@ -113,6 +121,7 @@ class LeadController extends AdminController
     {
         if ($request->isMethod('post')) {
             $data = $request->all();
+            
 
             if(!empty($data['id'])){
                 $row = Enquiry::find($data['id']);
@@ -344,7 +353,6 @@ class LeadController extends AdminController
                     }else{
                         Sms::to($to)->content($data['content'])->send();
                     }
-                    
                 }
                 
 
@@ -376,6 +384,7 @@ class LeadController extends AdminController
                 $row->enquiry_id = $lead->id;
                 $row->phone = $lead->phone;
                 $row->status = 'publish';
+                $row->read_status = 0;
                 $row->save();
 
                 $history = new LeadHistory();
@@ -388,7 +397,7 @@ class LeadController extends AdminController
             return 1;
         // }
     }
-    public function index(Request $request)
+public function index(Request $request)
     {
         // $leads = Enquiry::whereBetween('id', [700, 800])->orderBy('id', 'ASC')->get();
         // $dataArra = array();

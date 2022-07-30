@@ -1501,6 +1501,7 @@ function leadSetReminder($data){
         $row->enquiry_id = $lead->id;
         $row->phone = $lead->phone;
         $row->status = 'publish';
+        $row->read_status = 0;
         $row->save();
 
         $history = new LeadHistory();
@@ -1546,7 +1547,7 @@ function getDirections($id = null){
     return $data;
 }
 function getAttrTypes($id = null){
-    $data = array(1=>'Sightseeing',2=>'Flight',3=>'Meal',4=>'Restaurant',5=>'Transfers',6=>'Duration',7=>'Facilities',8=>'Hotel',9=>'Extra Content',10=>'Transport Vendor');
+    $data = array(1=>'Sightseeing',2=>'Flight',3=>'Meal',4=>'Restaurant',5=>'Transfers',6=>'Duration',7=>'Facilities',8=>'Hotel',9=>'Extra Content',10=>'Transport Vendor',11=>'Hotel Policy',12=>'Location Area');
     if ($id != null) {
        $data = $data[$id];
     }
@@ -1703,3 +1704,9 @@ function getAttributeByTerm($attr_id){
     $data = Attributes::select('id','name','type')->where('id',$attr_id)->first();
     return @$data;
 }
+
+function getLeadReminder(){
+    $reminders = LeadReminder::select('id','enquiry_id','content')->where('date','<=', date('Y-m-d H:i:s'))->where('create_user', Auth::id())->where('read_status', 0)->orderBy('id','ASC')->get()->toJson();
+    return @$reminders;
+}
+

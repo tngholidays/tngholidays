@@ -2817,3 +2817,58 @@ color:#4b4b4b
 .modal .modal-content .modal-header h2.modal-title { font-size: 1.25rem;}
 .modal .modal-content .hotel-rooms .ResultNotFound { width:100%; float: left;}
 .modal .modal-content .ResultNotFound h3 { width: 100%; float:left; padding: 6% 0px 6% 0px; text-align: center; font-size: 15px; font-weight: 400;}
+#filterModal{
+	z-index: 9999999 !important;
+}
+.customFilter .bravo_filter .g-filter-item .item-content {
+    margin-top: 20px;
+}
+.customFilter .bravo_filter .g-filter-item .item-content ul {
+    list-style: none;
+}
+.customFilter .bravo-checkbox {
+    margin-bottom: 5px;
+}
+.customFilter .bravo-checkbox label {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s;
+    padding-left: 25px;
+    font-size: 14px;
+    color: #5e6d77;
+    font-weight: 400;
+    margin-bottom: 0;
+    display: inline-block;
+}
+.customFilter .bravo-checkbox input[type="checkbox"] {
+    display: none;
+}
+.customFilter .bravo-checkbox input {
+    margin-right: 5px;
+}
+
+
+.customFilter .bravo-checkbox .checkmark {
+    display: inline-block;
+    height: 14px;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 14px;
+    border: 1px solid #a0a9b2;
+    border-radius: 2px;
+    background: #fff;
+}
+.customFilter .bravo-checkbox input[type="checkbox"]:checked + .checkmark:after {
+    content: "";
+    position: absolute;
+    background-color: transparent;
+    border-radius: 0;
+    left: 4px;
+    top: 1px;
+    width: 5px;
+    height: 8px;
+    border: solid #5191fa;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}

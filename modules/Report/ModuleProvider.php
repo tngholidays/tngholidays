@@ -37,6 +37,18 @@ class ModuleProvider extends \Modules\ModuleServiceProvider
                         'icon'       => 'icon ion-ios-pricetags',
                         'permission' => 'report_view',
                     ],
+                    'reminder-report'=>[
+                        'url'        => 'admin/module/report/reminder-report',
+                        'title'      => __('Reminder Reports'),
+                        'icon'       => 'icon ion-ios-pricetags',
+                        'permission' => 'report_view',
+                    ],
+                    'leads-report'=>[
+                        'url'        => 'admin/module/report/leads-report',
+                        'title'      => __('Leads Reports'),
+                        'icon'       => 'icon ion-ios-pricetags',
+                        'permission' => 'report_view',
+                    ],
                     'statistic'=>[
                         'url'        => 'admin/module/report/statistic',
                         'title'      => __('Booking Statistic'),

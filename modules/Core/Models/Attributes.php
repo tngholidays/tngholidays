@@ -44,4 +44,8 @@ class Attributes extends BaseModel
         }
         return $data;
     }
+    public function location()
+    {
+        return $this->hasOne("Modules\Location\Models\Location", 'id', 'location');
+    }
 }

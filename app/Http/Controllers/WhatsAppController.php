@@ -64,7 +64,7 @@ class WhatsAppController extends Controller
             $persons = (is_numeric($adult) ? $adult : 0);
             $persons += (is_numeric($child) ? $child : 0);
             $persons += (is_numeric($kids) ? $kids : 0);
-             $msg = 'Thanks for Enquiry about'.'%0a Destination: '.$destination.'%0a Duration: '.$data->Duration.'%0a No. of Person: '.$persons.'%0a Approx Journey Date: '.@$data->Date.'%0aWe will get back soon with best quotation. for more call on 7823070707';
+             $msg = 'Thanks for Enquiry about'.'%0a Destination: '.$destination.'%0a Duration: '.$data->Duration.'%0a No. of Person: '.$persons.'%0a Approx Journey Date: '.@$data->Date.'%0aWe will get back soon with best quotation. for more call on 7023642193';
             if($data->Duration!="")
              {
 
@@ -983,7 +983,7 @@ class WhatsAppController extends Controller
                         $date=$this->getdata($whatappdata->id,'Travel Date');
 
 
-                        $msg = 'Thanks for Enquiry about'.'%0a Destination: '.$destination.'%0a Duration: '.$duration.'%0a No. of Person: '.$persons.'%0a Approx Journey Date: '.@$date.'%0aWe will get back soon with best quotation. for more call on 7823070707';
+                        $msg = 'Thanks for Enquiry about'.'%0a Destination: '.$destination.'%0a Duration: '.$duration.'%0a No. of Person: '.$persons.'%0a Approx Journey Date: '.@$date.'%0aWe will get back soon with best quotation. for more call on 7023642193';
 
                         $output['data']=$msg;
                         //"\n\n9️⃣ 👉 Main Menu";
@@ -1321,7 +1321,7 @@ class WhatsAppController extends Controller
         $msg = "Thanks for Enquiry about \n*Destination:* ".$whatappdata->city."\n *Duration:* ".$whatappdata->package."\n *No. of Person:* ".$whatappdata->adult."\n *Approx Journey Date:* ".$whatappdata->travel_date."\nWe will get back soon with best quotation.";
         $button= array();
         $button[0]['index']="1";
-        $button[0]['callButton']=array('displayText'=>"Call To Expert",'phoneNumber'=>'+917823070707');
+        $button[0]['callButton']=array('displayText'=>"Call To Expert",'phoneNumber'=>'+917023642193');
         $button[1]['index']="2";
         $button[1]['urlButton']=array('displayText'=>"TNG Holidays",'url'=>'https://tngholidays.com/');
 

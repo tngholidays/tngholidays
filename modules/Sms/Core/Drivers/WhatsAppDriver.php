@@ -44,7 +44,6 @@ class WhatsAppDriver extends Driver
 	    return $result;
     }
     public function WhatsAppCurl($data){
-    	dd($data);
 		
 		$ch = curl_init($this->config['url']);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

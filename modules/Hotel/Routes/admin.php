@@ -11,10 +11,14 @@ Route::group(['prefix'=>'attribute'],function (){
     Route::get('/','AttributeController@index')->name('hotel.admin.attribute.index');
     Route::get('edit/{id}','AttributeController@edit')->name('hotel.admin.attribute.edit');
     Route::post('store/{id}','AttributeController@store')->name('hotel.admin.attribute.store');
+    Route::post('/editAttrBulk','AttributeController@editAttrBulk')->name('hotel.admin.attribute.editAttrBulk');
 
-    Route::get('terms/{id}','AttributeController@terms')->name('hotel.admin.attribute.term.index');
+    Route::get('terms/{attr_id}','AttributeController@terms')->name('hotel.admin.attribute.term.index');
     Route::get('term_edit/{id}','AttributeController@term_edit')->name('hotel.admin.attribute.term.edit');
     Route::get('term_store','AttributeController@term_store')->name('hotel.admin.attribute.term.store');
+
+    Route::get('/add-term/{attr_id}','AttributeController@addTerm')->name('hotel.admin.attribute.term.addTerm');
+    Route::post('/editTermBulk','AttributeController@editTermBulk')->name('hotel.admin.attribute.term.editTermBulk');
 
     Route::get('getForSelect2','AttributeController@getForSelect2')->name('hotel.admin.attribute.term.getForSelect2');
     Route::get('getAttributeForSelect2','AttributeController@getAttributeForSelect2')->name('hotel.admin.attribute.getForSelect2');

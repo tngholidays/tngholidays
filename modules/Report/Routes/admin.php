@@ -35,3 +35,7 @@ Route::group(['prefix' => 'booking'],function (){
     Route::get('/booking-form/{id}','EnquiryController@bookingForm')->name('report.admin.bookingForm');
     Route::post('/bookingByAdmin/{id}','EnquiryController@bookingByAdmin')->name('report.admin.bookingByAdmin');
 });
+Route::get('/activity-report','BookingController@activityReport')->name('report.admin.activityReport');
+Route::get('/expences-report','BookingController@expencesReport')->name('report.admin.expencesReport');
+Route::get('/leads-report','BookingController@leadsReport')->name('report.admin.leadsReport');
+Route::get('/reminder-report','BookingController@reminderReport')->name('report.admin.reminderReport');
