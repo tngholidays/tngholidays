@@ -522,7 +522,7 @@ button, input, optgroup, select, textarea {
                                                                                     <table width="100%">
                                                                                         <tr>
                                                                                             <td class="label">
-                                                                                                {{$applied_coupon['code']}}
+                                                                                                {{@$applied_coupon['code']}}
                                                                                                 :
                                                                                             </td>
                                                                                             <td class="val no-r-padding">

@@ -290,6 +290,11 @@ class Tour extends Bookable
 
     public function addToCart(Request $request)
     {
+        if(!empty($request->postData)){
+            $request->merge(json_decode($request->postData,true));
+            $request->request->remove('postData');
+        }
+        dd($request->all());
         $res = $this->addToCartValidate($request);
         if ($res !== true)
             return $res;
@@ -651,6 +656,10 @@ class Tour extends Bookable
     public function addToCartByAdmin(Request $request)
     {
         // dd($this);
+        if(!empty($request->postData)){
+            $request->merge(json_decode($request->postData,true));
+            $request->request->remove('postData');
+        }
         $tourDetails = $request->input('tour_details');
         $tour = margeCustomTour($this->id, $tourDetails);
         $res = $tour->addToCartValidate($request);

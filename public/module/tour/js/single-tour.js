@@ -983,10 +983,7 @@ Vue.component('card3', {
                     'total_transfers_price':this.total_transfers_price,
                     'total_sightseeing_price':this.total_sightseeing_price,
                 }
-                $.ajax({
-
-                    url:bookingCore.url+'/booking/addToCart',
-                    data:{
+                var postData = {
                         service_id:this.id,
                         service_type:'tour',
                         start_date:this.start_date,
@@ -1002,6 +999,14 @@ Vue.component('card3', {
                         guests:this.guests,
                         booking_type:this.booking_type,
                         enquiry_id:this.enquiry_id
+                    }
+                $.ajax({
+
+                    url:bookingCore.url+'/booking/addToCart',
+                    data:{
+                        service_id:this.id,
+                        service_type:'tour',
+                        postData:JSON.stringify(postData)
                     },
                     dataType:'json',
                     type:'post',

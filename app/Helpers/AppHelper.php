@@ -1555,8 +1555,10 @@ function getAttrTypes($id = null){
 }
 function getInclusionsArray($ids){
     $arr = [];
-    foreach ($ids as $key => $id) {
-       $arr[] = getInclusions($id);
+    if(!empty($ids) and count($ids) > 0){
+        foreach ($ids as $key => $id) {
+           $arr[] = getInclusions($id);
+        }
     }
     return implode(", ",$arr);
 }
@@ -1701,7 +1703,7 @@ function calculateTermPriceWithTrans($terms, $total_guests)
     return $array;
 }
 function getAttributeByTerm($attr_id){
-    $data = Attributes::select('id','name','type')->where('id',$attr_id)->first();
+    $data = Attributes::select('id','name','type','location')->where('id',$attr_id)->first();
     return @$data;
 }
 
@@ -1709,4 +1711,3 @@ function getLeadReminder(){
     $reminders = LeadReminder::select('id','enquiry_id','content')->where('date','<=', date('Y-m-d H:i:s'))->where('create_user', Auth::id())->where('read_status', 0)->orderBy('id','ASC')->get()->toJson();
     return @$reminders;
 }
-

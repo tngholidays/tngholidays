@@ -359,7 +359,7 @@ class EnquiryController extends AdminController
            // return view('Report::admin.booking.proposalPDF', $data);
            $pdf = PDF::loadView('Report::admin.booking.proposalPDF',$data);
            $output = $pdf->output();
-           $name = @$enquiry->name.'proposal-'.$enquiry->id; 
+           $name = 'proposal-'.$enquiry->id; 
            $file_name = $name.'.pdf';
            $filepath = public_path().'/voucher/'.$file_name;
            $data['filepath'] = asset('voucher/'.$file_name);
